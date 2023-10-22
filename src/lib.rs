@@ -3,6 +3,7 @@ use crate::render::render;
 use crate::style::Style::{BackgroundColor, Height, Width};
 use wasm_bindgen::prelude::*;
 
+mod dom_component;
 mod element;
 mod render;
 mod style;

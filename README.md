@@ -1,15 +1,10 @@
-# Cottontail
+# Cottontail 🐇
 
-[View documentation for this example online][dox] or [View compiled example
-online][compiled]
+A React-like library for building user interfaces in Rust with WebAssembly.
 
-[compiled]: https://rustwasm.github.io/wasm-bindgen/exbuild/canvas/
-[dox]: https://rustwasm.github.io/docs/wasm-bindgen/examples/2d-canvas.html
-
-You can build the example locally with:
-
+Run:
 ```
 $ npm run serve
 ```
 
-and then visiting http://localhost:8080 in a browser should run the example!
+and then visiting http://localhost:8080 in a browser.

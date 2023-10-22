@@ -82,7 +82,14 @@ impl CustomComponent for App {
 
     span([
       style([Position(Absolute), Width(12.), Height(21.)]),
-      children([span([]), div([]), Numbers {}.get()]),
+      children([
+        span([]),
+        div([]),
+        div([]),
+        div([]),
+        div([]),
+        Numbers {}.get(),
+      ]),
       on_click! {self.n += 1},
     ])
   }
