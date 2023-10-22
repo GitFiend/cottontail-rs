@@ -26,19 +26,19 @@ macro_rules! use_view {
   };
 }
 
-fn span<const N: usize>(attr: [Attribute; N]) -> VNode {
+pub fn span<const N: usize>(attr: [Attribute; N]) -> VNode {
   VNode::Span(Vec::from(attr))
 }
 
-fn children<const N: usize>(c: [VNode; N]) -> Attribute {
+pub fn children<const N: usize>(c: [VNode; N]) -> Attribute {
   Attribute::Children(Vec::from(c))
 }
 
-fn style<const N: usize>(s: [Style; N]) -> Attribute {
+pub fn style<const N: usize>(s: [Style; N]) -> Attribute {
   Attribute::Styles(Vec::from(s))
 }
 
-fn div<const N: usize>(attr: [Attribute; N]) -> VNode {
+pub fn div<const N: usize>(attr: [Attribute; N]) -> VNode {
   VNode::Div(Vec::from(attr))
 }
 

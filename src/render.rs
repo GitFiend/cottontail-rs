@@ -33,6 +33,12 @@ pub fn render(node: VNode, prev_node: Option<VNode>, root_element: HtmlElement) 
                   Style::Height(h) => {
                     div.style().set_property("height", &h.to_string()).unwrap();
                   }
+                  Style::BackgroundColor(colour) => {
+                    div
+                      .style()
+                      .set_property("background-color", &colour.to_string())
+                      .unwrap();
+                  }
                 }
               }
             }
