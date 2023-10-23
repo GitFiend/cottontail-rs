@@ -1,6 +1,6 @@
 # Cottontail 🐇
 
-A React-like library for building user interfaces in Rust with WebAssembly.
+An experimental React-like library for building user interfaces in Rust with WebAssembly. Early work in progress
 
 Run:
 ```

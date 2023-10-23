@@ -1,22 +1,10 @@
 use crate::element::{CustomComponent, VNode};
-use crate::style::Position::Absolute;
 use crate::style::Style;
-use crate::style::Style::Position;
 
 pub enum Node {
   Div(Div),
   Span(Span),
   Custom(Box<dyn CustomComponent>),
-}
-
-impl Node {
-  pub fn render(&mut self) -> VNode {
-    match self {
-      Node::Div(d) => d.render(),
-      Node::Span(s) => s.render(),
-      Node::Custom(c) => c.render(),
-    }
-  }
 }
 
 fn test() {

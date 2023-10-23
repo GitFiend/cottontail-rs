@@ -43,7 +43,7 @@ pub fn div<const N: usize>(attr: [Attribute; N]) -> VNode {
 }
 
 #[macro_export]
-macro_rules! comp {
+macro_rules! custom {
   ($c: expr) => {
     VNode::Custom(Box::new($c))
   };
@@ -59,22 +59,63 @@ macro_rules! on_click {
 
 pub trait CustomComponent {
   fn render(&mut self) -> VNode;
+  fn select_state(&mut self);
 }
 
-pub struct Numbers {}
+pub struct NumbersState {
+  numbers: Vec<i32>,
+}
+
+pub struct Numbers {
+  state: NumbersState,
+}
+
 impl Numbers {
-  fn get(self) -> VNode {
-    VNode::Custom(Box::new(self))
+  pub fn new() -> Self {
+    Self {
+      state: NumbersState {
+        numbers: Vec::new(),
+      },
+    }
   }
 }
+
+fn test_mut() {
+  let mut n = 4;
+
+  a(&mut n);
+  b(&mut n);
+}
+
+fn a(n: &mut i32) {
+  *n += 1;
+}
+
+fn b(n: &mut i32) {
+  *n += 1;
+}
+
 impl CustomComponent for Numbers {
   fn render(&mut self) -> VNode {
     span([])
   }
+
+  fn select_state(&mut self) {
+    self.state = NumbersState {
+      numbers: Vec::new(),
+    }
+  }
+}
+
+pub trait State {}
+
+pub struct AppState {
+  on: bool,
 }
 
 pub struct App {
   n: i32,
+  state: AppState,
 }
 impl CustomComponent for App {
   fn render(&mut self) -> VNode {
@@ -88,9 +129,13 @@ impl CustomComponent for App {
         div([]),
         div([]),
         div([]),
-        Numbers {}.get(),
+        custom!(Numbers::new()),
       ]),
       on_click! {self.n += 1},
     ])
+  }
+
+  fn select_state(&mut self) {
+    self.state = AppState { on: false };
   }
 }
