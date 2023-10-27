@@ -38,6 +38,45 @@ pub fn style<const N: usize>(s: [Style; N]) -> Attribute {
   Attribute::Styles(Vec::from(s))
 }
 
+// #[macro_export]
+// macro_rules! style2 {
+//   ($items: expr) => {
+//     Attribute::Styles(Vec::from($items))
+//   };
+// }
+
+#[macro_export]
+macro_rules! div {
+  ( $($item:expr),* ) => {{
+     $crate::element::VNode::Div(Vec::from([
+       $($item,)*
+     ]))
+  }};
+}
+
+#[macro_export]
+macro_rules! children {
+  ( $($item:expr),* ) => {{
+     $crate::element::Attribute::Children(Vec::from([
+       $($item,)*
+     ]))
+  }};
+}
+
+#[macro_export]
+macro_rules! style {
+  ( $($item:expr),* ) => {{
+    #[allow(unused_imports)]
+    use $crate::style::Style::*;
+    #[allow(unused_imports)]
+    use $crate::style::Position::*;
+
+    $crate::element::Attribute::Styles(Vec::from([
+      $($item,)*
+    ]))
+  }};
+}
+
 pub fn div<const N: usize>(attr: [Attribute; N]) -> VNode {
   VNode::Div(Vec::from(attr))
 }

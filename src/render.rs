@@ -27,6 +27,15 @@ pub fn render(node: VNode, prev_node: Option<VNode>, root_element: HtmlElement) 
                       .set_property("position", &pos.to_string())
                       .unwrap();
                   }
+                  Style::Left(l) => {
+                    div.style().set_property("left", &l.to_string()).unwrap();
+                  }
+                  Style::Top(t) => {
+                    div.style().set_property("top", &t.to_string()).unwrap();
+                  }
+                  Style::Bottom(b) => {
+                    div.style().set_property("bottom", &b.to_string()).unwrap();
+                  }
                   Style::Width(w) => {
                     div.style().set_property("width", &w.to_string()).unwrap();
                   }
@@ -42,7 +51,11 @@ pub fn render(node: VNode, prev_node: Option<VNode>, root_element: HtmlElement) 
                 }
               }
             }
-            Attribute::Children(_) => {}
+            Attribute::Children(children) => {
+              for child in children {
+                render(child, None, div.clone().dyn_into::<HtmlElement>().unwrap());
+              }
+            }
             Attribute::Events(_) => {}
           }
         }

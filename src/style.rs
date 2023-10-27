@@ -3,6 +3,9 @@ use std::fmt;
 pub enum Style {
   BackgroundColor(String),
   Position(Position),
+  Left(f64),
+  Top(f64),
+  Bottom(f64),
   Width(f64),
   Height(f64),
 }
