@@ -57,6 +57,7 @@ pub fn render(node: VNode, prev_node: Option<VNode>, root_element: HtmlElement) 
               }
             }
             Attribute::Events(_) => {}
+            _ => {}
           }
         }
 

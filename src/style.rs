@@ -1,3 +1,4 @@
+use crate::element::Attribute;
 use crate::style::Position::Absolute;
 use std::fmt;
 
@@ -44,6 +45,12 @@ impl Styles {
   pub fn position(mut self, position: Position) -> Self {
     self.styles.push(StyleAttribute::Position(position));
     self
+  }
+}
+
+impl From<Styles> for Attribute {
+  fn from(styles: Styles) -> Attribute {
+    Attribute::Styles2(styles)
   }
 }
 
