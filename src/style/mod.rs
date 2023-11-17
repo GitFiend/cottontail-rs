@@ -1,5 +1,6 @@
+mod border;
+
 use crate::element::Attribute;
-use crate::style::Position::Absolute;
 use std::fmt;
 
 pub enum Style {
@@ -46,6 +47,9 @@ impl Styles {
     self.styles.push(StyleAttribute::Position(position));
     self
   }
+  pub fn border(mut self) -> Self {
+    self
+  }
 }
 
 impl From<Styles> for Attribute {
@@ -62,6 +66,7 @@ enum StyleAttribute {
   Bottom(f64),
   Width(f64),
   Height(f64),
+  Border,
 }
 
 pub fn styles() -> Styles {
@@ -69,5 +74,5 @@ pub fn styles() -> Styles {
 }
 
 fn test() {
-  let style = styles().position(Absolute).background("blue");
+  let style = styles().position(Position::Absolute).background("blue");
 }
