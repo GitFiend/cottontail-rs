@@ -1,5 +1,5 @@
 use crate::element::{Attribute, VNode};
-use crate::style::Style;
+use crate::style::StyleAttribute;
 use crate::util::js_helpers::document;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlDivElement, HtmlElement};
@@ -18,36 +18,37 @@ pub fn render(node: VNode, prev_node: Option<VNode>, root_element: HtmlElement) 
 
         for a in attr {
           match a {
-            Attribute::Styles(styles) => {
-              for style in styles {
+            Attribute::Styles2(styles) => {
+              for style in styles.styles {
                 match style {
-                  Style::Position(pos) => {
-                    div
-                      .style()
-                      .set_property("position", &pos.to_string())
-                      .unwrap();
+                  StyleAttribute::Position(pos) => {
+                    // div
+                    // .style()
+                    // .set_property("position", &pos.to_string())
+                    // .unwrap();
                   }
-                  Style::Left(l) => {
+                  StyleAttribute::Left(l) => {
                     div.style().set_property("left", &l.to_string()).unwrap();
                   }
-                  Style::Top(t) => {
+                  StyleAttribute::Top(t) => {
                     div.style().set_property("top", &t.to_string()).unwrap();
                   }
-                  Style::Bottom(b) => {
+                  StyleAttribute::Bottom(b) => {
                     div.style().set_property("bottom", &b.to_string()).unwrap();
                   }
-                  Style::Width(w) => {
+                  StyleAttribute::Width(w) => {
                     div.style().set_property("width", &w.to_string()).unwrap();
                   }
-                  Style::Height(h) => {
+                  StyleAttribute::Height(h) => {
                     div.style().set_property("height", &h.to_string()).unwrap();
                   }
-                  Style::BackgroundColor(colour) => {
+                  StyleAttribute::BackgroundColor(colour) => {
                     div
                       .style()
                       .set_property("background-color", &colour.to_string())
                       .unwrap();
                   }
+                  StyleAttribute::Border => {}
                 }
               }
             }
