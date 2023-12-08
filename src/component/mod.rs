@@ -1,3 +1,5 @@
+mod order;
+
 use crate::element::{div, VNode};
 use std::rc::Rc;
 
@@ -45,7 +47,20 @@ struct CustomMeta {
   pub key: String,
 }
 
-impl CustomMeta {}
+impl CustomMeta {
+  pub fn new() -> Self {
+    let n: u32 = 43;
+    let c = char::from_u32(n).unwrap();
+
+    Self {
+      component: Box::new(MyComponent { num: 3 }),
+      direct_parent: Rc::new(ParentComponent::Root(RootComponent {})),
+      dom_parent: Rc::new(DomComponent {}),
+      order: "before".to_string(),
+      key: "key".to_string(),
+    }
+  }
+}
 
 fn try_thing() {
   let a: AnyComponent = MyComponent { num: 3 }.into();
