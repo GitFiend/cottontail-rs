@@ -1,4 +1,5 @@
-use crate::style::{styles, Style, Styles};
+use crate::style::position::Position;
+use crate::style::{styles, Styles};
 
 pub enum Event {
   Click,
@@ -13,7 +14,6 @@ pub enum VNode {
 
 pub enum Attribute {
   Children(Vec<VNode>),
-  Styles(Vec<Style>),
   Styles2(Styles),
   Events(Event),
 }
@@ -22,7 +22,7 @@ pub enum Attribute {
 macro_rules! use_view {
   () => {
     use $crate::element::Event::*;
-    use $crate::style::Position::*;
+    // use $crate::style::Position::*;
     use $crate::style::Style::*;
   };
 }
@@ -34,17 +34,6 @@ pub fn span<const N: usize>(attr: [Attribute; N]) -> VNode {
 pub fn children<const N: usize>(c: [VNode; N]) -> Attribute {
   Attribute::Children(Vec::from(c))
 }
-
-pub fn style<const N: usize>(s: [Style; N]) -> Attribute {
-  Attribute::Styles(Vec::from(s))
-}
-
-// #[macro_export]
-// macro_rules! style2 {
-//   ($items: expr) => {
-//     Attribute::Styles(Vec::from($items))
-//   };
-// }
 
 #[macro_export]
 macro_rules! div {
@@ -73,20 +62,6 @@ macro_rules! children {
      $crate::element::Attribute::Children(Vec::from([
        $($item,)*
      ]))
-  }};
-}
-
-#[macro_export]
-macro_rules! style {
-  ( $($item:expr),* ) => {{
-    #[allow(unused_imports)]
-    use $crate::style::Style::*;
-    #[allow(unused_imports)]
-    use $crate::style::Position::*;
-
-    $crate::element::Attribute::Styles(Vec::from([
-      $($item,)*
-    ]))
   }};
 }
 
@@ -171,11 +146,8 @@ pub struct App {
 }
 impl CustomComponent for App {
   fn render(&mut self) -> VNode {
-    use_view!();
-
     span([
-      styles().position(Absolute).background("blue").into(),
-      style([Position(Absolute), Width(12.), Height(21.)]),
+      styles().position(Position::new()).background("blue").into(),
       children([
         span([]),
         div([]),
@@ -184,7 +156,7 @@ impl CustomComponent for App {
         div([]),
         custom!(Numbers::new()),
       ]),
-      on_click! {self.n += 1},
+      // on_click! {self.n += 1},
     ])
   }
 

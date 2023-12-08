@@ -1,5 +1,5 @@
 use crate::element::{CustomComponent, VNode};
-use crate::style::Style;
+use crate::style::StyleAttribute;
 
 pub enum Node {
   Div(Div),
@@ -15,7 +15,7 @@ fn test() {
 macro_rules! basic_dom_elements {
   ($struct_name: ident, $func_name: ident) => {
     pub struct $struct_name {
-      pub styles: Vec<Style>,
+      pub styles: Vec<StyleAttribute>,
       pub children: Vec<VNode>,
     }
 
@@ -31,7 +31,7 @@ macro_rules! basic_dom_elements {
         todo!()
       }
 
-      pub fn style<const N: usize>(mut self, style: [Style; N]) -> Self {
+      pub fn style<const N: usize>(mut self, style: [StyleAttribute; N]) -> Self {
         self.styles.extend(style);
         self
       }

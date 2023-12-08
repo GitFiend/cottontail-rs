@@ -1,33 +1,16 @@
+pub(crate) mod border;
+pub(crate) mod position;
+
 use crate::element::Attribute;
 use crate::style::Position::Absolute;
 use std::cell::UnsafeCell;
 use std::fmt;
 use std::ops::{Deref, DerefMut, Shl, ShlAssign};
+use crate::style::position::Position;
+use js_sys::JsString;
 
-pub enum Style {
-  BackgroundColor(String),
-  Position(Position),
-  Left(f64),
-  Top(f64),
-  Bottom(f64),
-  Width(f64),
-  Height(f64),
-}
-
-pub enum Position {
-  Absolute,
-  Relative,
-  Fixed,
-}
-
-impl fmt::Display for Position {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    match self {
-      Position::Absolute => write!(f, "absolute"),
-      Position::Relative => write!(f, "relative"),
-      Position::Fixed => write!(f, "fixed"),
-    }
-  }
+pub trait StyleTrait {
+  fn to_js_string(&self) -> JsString;
 }
 
 struct MyStore {
@@ -140,7 +123,7 @@ mod tests {
 }
 
 pub struct Styles {
-  styles: Vec<StyleAttribute>,
+  pub styles: Vec<StyleAttribute>,
 }
 impl Styles {
   pub fn new() -> Styles {
@@ -157,6 +140,9 @@ impl Styles {
     self.styles.push(StyleAttribute::Position(position));
     self
   }
+  pub fn border(mut self) -> Self {
+    self
+  }
 }
 
 impl From<Styles> for Attribute {
@@ -165,7 +151,7 @@ impl From<Styles> for Attribute {
   }
 }
 
-enum StyleAttribute {
+pub enum StyleAttribute {
   BackgroundColor(String),
   Position(Position),
   Left(f64),
@@ -173,6 +159,7 @@ enum StyleAttribute {
   Bottom(f64),
   Width(f64),
   Height(f64),
+  Border,
 }
 
 pub fn styles() -> Styles {
@@ -180,5 +167,5 @@ pub fn styles() -> Styles {
 }
 
 fn test() {
-  let style = styles().position(Absolute).background("blue");
+  let style = styles().position(Position::new()).background("blue");
 }
