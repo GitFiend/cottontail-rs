@@ -2,12 +2,10 @@ pub(crate) mod border;
 pub(crate) mod position;
 
 use crate::element::Attribute;
-use crate::style::Position::Absolute;
-use std::cell::UnsafeCell;
-use std::fmt;
-use std::ops::{Deref, DerefMut, Shl, ShlAssign};
 use crate::style::position::Position;
 use js_sys::JsString;
+use std::cell::UnsafeCell;
+use std::ops::{Deref, DerefMut, Shl, ShlAssign};
 
 pub trait StyleTrait {
   fn to_js_string(&self) -> JsString;
@@ -15,24 +13,18 @@ pub trait StyleTrait {
 
 struct MyStore {
   pub num: Rune<u32>,
-  pub styles: Rune<Style>,
 }
 
 impl MyStore {
   pub fn new() -> Self {
-    Self {
-      num: Rune::new(0),
-      styles: Rune::new(Style::BackgroundColor("red".to_string())),
-    }
+    Self { num: Rune::new(0) }
   }
 
   fn do_stuff() {
-    let MyStore { num, styles } = MyStore::new();
+    let MyStore { num } = MyStore::new();
     let value = num.get();
 
     num.set(value + 1);
-
-    styles.set(Style::BackgroundColor("blue".to_string()));
   }
 }
 

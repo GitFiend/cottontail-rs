@@ -4,6 +4,10 @@ use crate::util::js_helpers::document;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlDivElement, HtmlElement};
 
+struct CottonTail {
+  // root:
+}
+
 pub fn render(node: VNode, prev_node: Option<VNode>, root_element: HtmlElement) {
   if let Some(prev) = prev_node {
     //

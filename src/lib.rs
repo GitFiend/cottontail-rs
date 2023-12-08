@@ -2,6 +2,7 @@ use crate::render::render;
 use wasm_bindgen::prelude::*;
 
 mod app_root;
+mod component;
 mod dom_component;
 mod element;
 mod render;
