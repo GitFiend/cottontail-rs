@@ -54,6 +54,18 @@ macro_rules! div {
   }};
 }
 
+macro_rules! style {
+  (position: $v: expr;) => {
+    format!("position: {}", $v)
+  };
+}
+
+fn test() {
+  let s = style! {
+    position: 35;
+  };
+}
+
 #[macro_export]
 macro_rules! children {
   ( $($item:expr),* ) => {{
