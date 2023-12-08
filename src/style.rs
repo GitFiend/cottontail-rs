@@ -1,3 +1,5 @@
+use crate::element::Attribute;
+use crate::style::Position::Absolute;
 use std::cell::UnsafeCell;
 use std::fmt;
 use std::ops::{Deref, DerefMut, Shl, ShlAssign};
@@ -135,4 +137,48 @@ mod tests {
 
     assert_eq!(*rune, 5);
   }
+}
+
+pub struct Styles {
+  styles: Vec<StyleAttribute>,
+}
+impl Styles {
+  pub fn new() -> Styles {
+    Styles { styles: Vec::new() }
+  }
+
+  pub fn background(mut self, background: &str) -> Self {
+    self
+      .styles
+      .push(StyleAttribute::BackgroundColor(background.to_string()));
+    self
+  }
+  pub fn position(mut self, position: Position) -> Self {
+    self.styles.push(StyleAttribute::Position(position));
+    self
+  }
+}
+
+impl From<Styles> for Attribute {
+  fn from(styles: Styles) -> Attribute {
+    Attribute::Styles2(styles)
+  }
+}
+
+enum StyleAttribute {
+  BackgroundColor(String),
+  Position(Position),
+  Left(f64),
+  Top(f64),
+  Bottom(f64),
+  Width(f64),
+  Height(f64),
+}
+
+pub fn styles() -> Styles {
+  Styles { styles: Vec::new() }
+}
+
+fn test() {
+  let style = styles().position(Absolute).background("blue");
 }

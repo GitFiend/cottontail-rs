@@ -1,4 +1,4 @@
-use crate::style::Style;
+use crate::style::{styles, Style, Styles};
 
 pub enum Event {
   Click,
@@ -14,6 +14,7 @@ pub enum VNode {
 pub enum Attribute {
   Children(Vec<VNode>),
   Styles(Vec<Style>),
+  Styles2(Styles),
   Events(Event),
 }
 
@@ -173,6 +174,7 @@ impl CustomComponent for App {
     use_view!();
 
     span([
+      styles().position(Absolute).background("blue").into(),
       style([Position(Absolute), Width(12.), Height(21.)]),
       children([
         span([]),
