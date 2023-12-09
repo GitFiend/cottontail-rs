@@ -5,7 +5,12 @@ pub struct NodeOrder {
   location: Vec<u32>,
 }
 
-pub fn insert(parent: &ParentDomComponent, child: &ElementComponent) {}
+pub fn insert(parent: &ParentDomComponent, child: &ElementComponent) {
+  let inserted = match parent {
+    ParentDomComponent::Root(c) => &c.inserted,
+    ParentDomComponent::Dom(c) => &c.inserted,
+  };
+}
 
 #[cfg(test)]
 mod tests {
