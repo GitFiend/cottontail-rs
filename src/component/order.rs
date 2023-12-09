@@ -1,7 +1,11 @@
+use crate::component::{ElementComponent, ParentDomComponent};
+
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub struct NodeOrder {
   location: Vec<u32>,
 }
+
+pub fn insert(parent: &ParentDomComponent, child: &ElementComponent) {}
 
 #[cfg(test)]
 mod tests {

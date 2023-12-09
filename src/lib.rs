@@ -1,5 +1,7 @@
 use crate::render::render;
+use crate::util::js_helpers::document;
 use wasm_bindgen::prelude::*;
+use web_sys::HtmlDivElement;
 
 mod app_root;
 mod component;
@@ -13,11 +15,22 @@ pub(crate) mod util;
 pub fn start() {
   console_log!("hello");
 
-  let root = util::js_helpers::document()
+  let root = document()
     .get_element_by_id("root")
     .unwrap()
     .dyn_into::<web_sys::HtmlElement>()
     .unwrap();
+
+  let div = document()
+    .create_element("div")
+    .unwrap()
+    .dyn_into::<HtmlDivElement>()
+    .unwrap();
+
+  let div2 = div.clone();
+  let equal = div2 == div;
+
+  console_log!("div: {:?}, equal: {equal}", div);
 
   render(
     div!(
