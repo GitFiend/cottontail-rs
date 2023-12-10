@@ -1,4 +1,5 @@
-use crate::element::{CustomComponent, VNode};
+use crate::component::CustomComponent;
+use crate::element::VNode;
 use crate::style::StyleAttribute;
 
 pub enum Node {

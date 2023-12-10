@@ -1,6 +1,8 @@
+use crate::component::CustomComponent;
 use crate::style::position::Position;
 use crate::style::{styles, Styles};
 
+#[derive(Clone)]
 pub enum Event {
   Click,
   MouseMove,
@@ -84,10 +86,10 @@ macro_rules! on_click {
   }};
 }
 
-pub trait CustomComponent {
-  fn render(&mut self) -> VNode;
-  fn select_state(&mut self);
-}
+// pub trait CustomComponent {
+//   fn render(&mut self) -> VNode;
+//   fn select_state(&mut self);
+// }
 
 pub struct NumbersState {
   numbers: Vec<i32>,
@@ -122,17 +124,17 @@ fn b(n: &mut i32) {
   *n += 1;
 }
 
-impl CustomComponent for Numbers {
-  fn render(&mut self) -> VNode {
-    span([])
-  }
-
-  fn select_state(&mut self) {
-    self.state = NumbersState {
-      numbers: Vec::new(),
-    }
-  }
-}
+// impl CustomComponent for Numbers {
+//   fn render(&mut self) -> VNode {
+//     span([])
+//   }
+//
+//   fn select_state(&mut self) {
+//     self.state = NumbersState {
+//       numbers: Vec::new(),
+//     }
+//   }
+// }
 
 pub trait State {}
 
@@ -160,7 +162,7 @@ impl CustomComponent for App {
     ])
   }
 
-  fn select_state(&mut self) {
-    self.state = AppState { on: false };
-  }
+  // fn select_state(&mut self) {
+  //   self.state = AppState { on: false };
+  // }
 }

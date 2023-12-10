@@ -1,78 +1,45 @@
-mod order;
-
-use crate::component::order::NodeOrder;
-use crate::element::{div, VNode};
-use std::collections::HashMap;
 use std::rc::Rc;
-use web_sys::{Element, HtmlElement, Text};
 
-trait ParentDomComp {
-  fn get_inserted() -> Vec<Rc<ElementComponent>>;
-}
+use web_sys::Text;
+
+use crate::component::order::OrderAttr;
+use crate::component::parent::{DomComponent, ParentDomComponent, RootComponent};
+use crate::element::{div, VNode};
+
+mod order;
+mod parent;
+mod trait_style;
 
 pub enum AnyComponent {
   Custom(Box<dyn CustomComponent>),
   Dom(DomComponent),
   Root(RootComponent),
-  Element(ElementComponent),
+  Text(TextComponent),
+}
+
+pub struct ChildAttr {
+  pub direct_parent: Rc<ParentDomComponent>,
+  pub dom_parent: Rc<DomComponent>,
 }
 
 pub enum SubComponent {
-  Custom(Box<dyn CustomComponent>),
+  // Custom(Box<dyn CustomComponent>),
   Dom(DomComponent),
   Element(ElementComponent),
-}
-
-pub enum ParentDomComponent {
-  Root(RootComponent),
-  Dom(DomComponent),
-}
-
-pub enum ParentComponent {
-  Root(RootComponent),
-  Dom(DomComponent),
-  Custom(Box<dyn CustomComponent>),
-}
-
-pub struct RootComponent {
-  pub element: HtmlElement,
-  pub order: NodeOrder,
-  pub key: String,
-  pub inserted: Vec<ElementComponent>,
-  pub siblings: HashMap<Element, Element>,
 }
 
 struct CustomMeta {
   // TODO: Props, __ref
+  pub child_attr: ChildAttr,
+  pub order_attr: OrderAttr,
   pub component: Box<dyn CustomComponent>,
-  pub direct_parent: Rc<ParentComponent>,
-  pub dom_parent: Rc<DomComponent>,
-  pub order: String,
-  pub key: String,
-  pub index: u32,
   pub sub_component: Option<SubComponent>,
 }
 
-pub struct DomComponent {
-  // TODO: Props
-  pub element: HtmlElement,
-  pub order: NodeOrder,
-  pub key: String,
-  pub index: u32,
-  pub direct_parent: Rc<ParentComponent>,
-  pub dom_parent: Rc<DomComponent>,
-  pub inserted: Vec<ElementComponent>,
-  pub siblings: HashMap<Element, Element>,
-  pub sub_components: HashMap<String, SubComponent>,
-}
-
 struct TextComponent {
+  pub order_attr: OrderAttr,
+  pub child_attr: ChildAttr,
   pub element: Text,
-  pub order: NodeOrder,
-  pub key: String,
-  pub direct_parent: Rc<ParentComponent>,
-  pub dom_parent: Rc<DomComponent>,
-  pub index: u32,
 }
 
 enum ElementComponent {
@@ -80,7 +47,7 @@ enum ElementComponent {
   Dom(DomComponent),
 }
 
-trait CustomComponent {
+pub trait CustomComponent {
   fn render(&mut self) -> VNode;
 }
 

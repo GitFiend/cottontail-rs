@@ -114,6 +114,7 @@ mod tests {
   }
 }
 
+#[derive(Clone)]
 pub struct Styles {
   pub styles: Vec<StyleAttribute>,
 }
@@ -143,6 +144,7 @@ impl From<Styles> for Attribute {
   }
 }
 
+#[derive(Clone)]
 pub enum StyleAttribute {
   BackgroundColor(String),
   Position(Position),
