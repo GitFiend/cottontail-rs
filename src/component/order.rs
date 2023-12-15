@@ -1,6 +1,5 @@
-use crate::component::parent::ParentAttr;
-use crate::component::{ElementComponent, ParentDomComponent};
-use std::rc::Rc;
+use crate::c_t_store::{CTStore, NONE};
+use crate::component::ParentDomComponent;
 
 pub struct OrderAttr {
   pub order: String,
@@ -13,55 +12,107 @@ pub struct NodeOrder {
   location: Vec<u32>,
 }
 
-pub fn apply_inserts(parent: ParentDomComponent) {
-  let ParentAttr {
-    inserted,
-    siblings,
-    element,
-  } = match parent {
-    ParentDomComponent::Root(c) => &c.parent_attr,
-    ParentDomComponent::Dom(c) => &c.parent_attr,
-  };
+fn apply_inserts2(parent: usize, store: &mut CTStore) {
+  let parent_element = &store.element[parent];
+  let mut next: Option<usize> = None;
 
-  let last = inserted.len() - 1;
-  let mut next: Option<Rc<ElementComponent>> = None;
+  if let Some(inserted) = &mut store.inserted[parent] {
+    for current in inserted.iter().rev().cloned() {
+      let current_element = &store.element[current];
 
-  for i in last..=0 {
-    let current = &inserted[i];
-
-    if next.is_none() {
-      // current.element;
-
-      // let element = match *current {
-      //   ElementComponent::Dom(c) => c.child_attr
-      // };
-      // if !siblings.iter().find(|(a, b)| {
-      //
-      // }) {
-      //
-      // }
-      // if siblings.get(current.element) {}
+      match next {
+        None => {
+          if store.siblings[current] == NONE {
+            parent_element.insert_before(current_element, None).unwrap();
+          }
+        }
+        Some(next) => {
+          if store.siblings[next] != NONE && store.siblings[next] != current {
+            parent_element
+              .insert_before(&store.element[current], Some(&**store.element[next]))
+              .unwrap();
+            store.siblings[next] = current;
+          }
+        }
+      }
+      next = Some(current);
     }
-
-    next = Some(current.clone());
   }
 }
 
-pub fn insert(parent: &mut ParentDomComponent, child: &ElementComponent) {
-  let ParentAttr { inserted, .. } = match parent {
-    ParentDomComponent::Root(c) => &c.parent_attr,
-    ParentDomComponent::Dom(c) => &c.parent_attr,
-  };
+pub fn apply_inserts(parent: &ParentDomComponent) {
+  // let ParentAttr {
+  //   inserted,
+  //   mut siblings,
+  //   element: parent_element,
+  // } = match parent {
+  //   ParentDomComponent::Root(c) => c.parent_attr.as_ref(),
+  //   ParentDomComponent::Dom(c) => c.parent_attr.as_ref(),
+  // };
 
-  let OrderAttr { order, key, .. } = match child {
-    ElementComponent::Text(c) => &c.order_attr,
-    ElementComponent::Dom(c) => &c.order_attr,
-  };
+  // let last = inserted.len() - 1;
+  // let mut next: Option<Rc<ElementComponent>> = None;
+  //
+  // for i in last..=0 {
+  //   let current: Rc<ElementComponent> = inserted[i].clone();
+  //
+  //   let current_element = match current.as_ref() {
+  //     ElementComponent::Text(c) => c.element.dyn_into().unwrap(),
+  //     ElementComponent::Dom(c) => c.element,
+  //   };
+  //
+  //   if let Some(next) = next {
+  //     let next_element = match next.as_ref() {
+  //       ElementComponent::Text(c) => &c.element.dyn_into().unwrap(),
+  //       ElementComponent::Dom(c) => &c.element,
+  //     };
+  //
+  //     if let Some(mut pair) = siblings.iter_mut().find(|(e, _)| e == next_element) {
+  //       if pair.1.is_none() || pair.1.unwrap() != current_element {
+  //         parent_element.insert_before(&current_element, Some(next_element));
+  //         pair.1 = Some(current_element.clone());
+  //       }
+  //     }
+  //   } else {
+  //     if !siblings.iter().any(|(e, _)| *e == current_element) {
+  //       parent_element.insert_before(&current_element, None);
+  //       siblings.push((current_element.clone(), None));
+  //     }
+  //   }
+  //
+  //   next = Some(current.clone());
+  // }
+}
 
-  let last = inserted.len() - 1;
+pub fn insert(parent: usize, child: usize, store: &mut CTStore) {
+  let order = &store.order[child];
+  let key = &store.key[child];
 
-  for i in last..=0 {
-    //
+  if let Some(inserted) = &mut store.inserted[parent] {
+    for (i, current) in inserted.iter().rev().cloned().enumerate() {
+      let next = inserted.get(i + 1);
+
+      /*
+      If order is the same we expect the keys to be different. This
+      is expected for a virtual list.
+       */
+      if order >= &store.order[current] {
+        if key != &store.key[current] {
+          if next.is_some() {
+            inserted.insert(i, child);
+            apply_inserts2(parent, store);
+          } else {
+            // TODO: Is this in the wrong order?
+            inserted.push(child);
+            apply_inserts2(parent, store);
+          }
+        }
+
+        return;
+      }
+    }
+    inserted.insert(0, child);
+    apply_inserts2(parent, store);
   }
 }
 

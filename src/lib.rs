@@ -4,7 +4,8 @@ use wasm_bindgen::prelude::*;
 use web_sys::HtmlDivElement;
 
 mod app_root;
-mod component;
+mod c_t_store;
+pub(crate) mod component;
 mod dom_component;
 mod element;
 mod render;

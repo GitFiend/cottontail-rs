@@ -6,8 +6,8 @@ use crate::component::order::OrderAttr;
 use crate::component::parent::{DomComponent, ParentDomComponent, RootComponent};
 use crate::element::{div, VNode};
 
-mod order;
-mod parent;
+pub mod order;
+pub mod parent;
 mod trait_style;
 
 pub enum AnyComponent {

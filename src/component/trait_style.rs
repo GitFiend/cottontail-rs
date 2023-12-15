@@ -46,7 +46,7 @@ macro_rules! parent_component {
     )*
   };
 }
-parent_component!(RootComponent, DomComponent);
+// parent_component!(RootComponent, DomComponent);
 
 /*
 

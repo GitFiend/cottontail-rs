@@ -156,7 +156,7 @@ impl CustomComponent for App {
         div([]),
         div([]),
         div([]),
-        custom!(Numbers::new()),
+        // custom!(Numbers::new()),
       ]),
       // on_click! {self.n += 1},
     ])
