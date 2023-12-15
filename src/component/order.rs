@@ -1,5 +1,4 @@
 use crate::c_t_store::{CTStore, NONE};
-use crate::component::ParentDomComponent;
 
 pub struct OrderAttr {
   pub order: String,
@@ -12,7 +11,80 @@ pub struct NodeOrder {
   location: Vec<u32>,
 }
 
-fn apply_inserts2(parent: usize, store: &mut CTStore) {
+impl NodeOrder {
+  pub fn new_root() -> Self {
+    Self { location: vec![1] }
+  }
+
+  pub fn next(&self, parent: &NodeOrder, index: u32) -> Self {
+    let mut location = parent.location.clone();
+    location.push(index);
+
+    Self { location }
+  }
+}
+
+// TODO: Figure out the rules for inserting and removing from CTStore!
+
+pub fn move_component(parent: usize, child: usize, store: &mut CTStore) {
+  let inserted = &mut store.inserted[parent];
+  let key = &store.key[child];
+
+  if let Some(inserted) = inserted {
+    if let Some(i) = inserted.iter().position(|ins| store.key[*ins] == *key) {
+      // TODO
+      inserted.remove(i);
+    }
+  }
+
+  insert_component(parent, child, store);
+}
+
+pub fn remove_component(parent: usize, child: usize, store: &mut CTStore) {
+  let inserted = &mut store.inserted[parent];
+  let key = &store.key[child];
+
+  if let Some(inserted) = inserted {
+    if let Some(i) = inserted.iter().position(|ins| store.key[*ins] == *key) {
+      // TODO
+      store.siblings.remove(i);
+    }
+  }
+}
+
+pub fn insert_component(parent: usize, child: usize, store: &mut CTStore) {
+  let order = &store.order[child];
+  let key = &store.key[child];
+
+  if let Some(inserted) = &mut store.inserted[parent] {
+    for (i, current) in inserted.iter().rev().cloned().enumerate() {
+      let next = inserted.get(i + 1);
+
+      /*
+      If order is the same we expect the keys to be different. This
+      is expected for a virtual list.
+       */
+      if order >= &store.order[current] {
+        if key != &store.key[current] {
+          if next.is_some() {
+            inserted.insert(i, child);
+            apply_inserts(parent, store);
+          } else {
+            // TODO: Is this in the wrong order?
+            inserted.push(child);
+            apply_inserts(parent, store);
+          }
+        }
+
+        return;
+      }
+    }
+    inserted.insert(0, child);
+    apply_inserts(parent, store);
+  }
+}
+
+fn apply_inserts(parent: usize, store: &mut CTStore) {
   let parent_element = &store.element[parent];
   let mut next: Option<usize> = None;
 
@@ -37,82 +109,6 @@ fn apply_inserts2(parent: usize, store: &mut CTStore) {
       }
       next = Some(current);
     }
-  }
-}
-
-pub fn apply_inserts(parent: &ParentDomComponent) {
-  // let ParentAttr {
-  //   inserted,
-  //   mut siblings,
-  //   element: parent_element,
-  // } = match parent {
-  //   ParentDomComponent::Root(c) => c.parent_attr.as_ref(),
-  //   ParentDomComponent::Dom(c) => c.parent_attr.as_ref(),
-  // };
-
-  // let last = inserted.len() - 1;
-  // let mut next: Option<Rc<ElementComponent>> = None;
-  //
-  // for i in last..=0 {
-  //   let current: Rc<ElementComponent> = inserted[i].clone();
-  //
-  //   let current_element = match current.as_ref() {
-  //     ElementComponent::Text(c) => c.element.dyn_into().unwrap(),
-  //     ElementComponent::Dom(c) => c.element,
-  //   };
-  //
-  //   if let Some(next) = next {
-  //     let next_element = match next.as_ref() {
-  //       ElementComponent::Text(c) => &c.element.dyn_into().unwrap(),
-  //       ElementComponent::Dom(c) => &c.element,
-  //     };
-  //
-  //     if let Some(mut pair) = siblings.iter_mut().find(|(e, _)| e == next_element) {
-  //       if pair.1.is_none() || pair.1.unwrap() != current_element {
-  //         parent_element.insert_before(&current_element, Some(next_element));
-  //         pair.1 = Some(current_element.clone());
-  //       }
-  //     }
-  //   } else {
-  //     if !siblings.iter().any(|(e, _)| *e == current_element) {
-  //       parent_element.insert_before(&current_element, None);
-  //       siblings.push((current_element.clone(), None));
-  //     }
-  //   }
-  //
-  //   next = Some(current.clone());
-  // }
-}
-
-pub fn insert(parent: usize, child: usize, store: &mut CTStore) {
-  let order = &store.order[child];
-  let key = &store.key[child];
-
-  if let Some(inserted) = &mut store.inserted[parent] {
-    for (i, current) in inserted.iter().rev().cloned().enumerate() {
-      let next = inserted.get(i + 1);
-
-      /*
-      If order is the same we expect the keys to be different. This
-      is expected for a virtual list.
-       */
-      if order >= &store.order[current] {
-        if key != &store.key[current] {
-          if next.is_some() {
-            inserted.insert(i, child);
-            apply_inserts2(parent, store);
-          } else {
-            // TODO: Is this in the wrong order?
-            inserted.push(child);
-            apply_inserts2(parent, store);
-          }
-        }
-
-        return;
-      }
-    }
-    inserted.insert(0, child);
-    apply_inserts2(parent, store);
   }
 }
 
