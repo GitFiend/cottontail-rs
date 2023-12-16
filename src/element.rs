@@ -11,7 +11,8 @@ pub enum Event {
 pub enum VNode {
   Div(Vec<Attribute>),
   Span(Vec<Attribute>),
-  Custom(Box<dyn CustomComponent>),
+  None, // Custom(Box<dyn CustomComponent>),
+  Root,
 }
 
 pub enum Attribute {

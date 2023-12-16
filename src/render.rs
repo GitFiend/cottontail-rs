@@ -1,11 +1,37 @@
+use crate::c_t_store::{CTStore, Id, NONE_ID};
 use crate::element::{Attribute, VNode};
 use crate::style::StyleAttribute;
 use crate::util::js_helpers::document;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlDivElement, HtmlElement};
 
-struct CottonTail {
-  // root:
+pub fn render2(
+  node: VNode,
+  prev: Option<Id>,
+  parent: Id,
+  dom_parent: Id,
+  index: u32,
+  store: &mut CTStore,
+) {
+  if let Some(prev) = prev {
+    // keep Id
+  } else {
+    match node {
+      VNode::Div(_) => {
+        // new Id
+        let div = document()
+          .create_element("div")
+          .unwrap()
+          .dyn_into::<HtmlElement>()
+          .unwrap();
+
+        store.add(node, Some(div), index, NONE_ID, None, parent, dom_parent);
+      }
+      VNode::Span(_) => {}
+      VNode::None => {}
+      VNode::Root => {}
+    }
+  }
 }
 
 pub fn render(node: VNode, prev_node: Option<VNode>, root_element: HtmlElement) {
@@ -68,7 +94,7 @@ pub fn render(node: VNode, prev_node: Option<VNode>, root_element: HtmlElement) 
 
         root_element.append_child(&div).unwrap();
       }
-      VNode::Custom(_) => {}
+      // VNode::Custom(_) => {}
       _ => {}
     }
     // root_element.append_child()

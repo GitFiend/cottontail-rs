@@ -3,15 +3,16 @@ use std::collections::VecDeque;
 use web_sys::HtmlElement;
 
 use crate::component::order::NodeOrder;
+use crate::element::VNode;
 
 pub type Id = usize;
 pub const NONE_ID: Id = 0;
 
-#[derive(Default)]
 pub struct CTStore {
+  pub kind: Vec<VNode>,
   pub element: Vec<Option<HtmlElement>>,
-  pub key: Vec<Option<String>>,
-  pub order: Vec<Option<NodeOrder>>,
+  pub key: Vec<String>,
+  pub order: Vec<NodeOrder>,
 
   // Index is the element id, value is the previous sibling element id.
   pub sibling: Vec<Id>,
@@ -22,12 +23,60 @@ pub struct CTStore {
   pub direct_parent: Vec<Id>,
   pub dom_parent: Vec<Id>,
 
-  pub deleted: Vec<Id>,
+  // TODO
+  pub deleted: Vec<bool>,
   pub next_id: Id,
   pub recycled_ids: VecDeque<Id>,
 }
 
 impl CTStore {
+  pub fn new(root_element: HtmlElement) -> Self {
+    // Root is position 1. 0 is always empty.
+    CTStore {
+      kind: vec![VNode::None, VNode::Root],
+      element: vec![None, Some(root_element)],
+      key: vec![String::default(), String::from("r")],
+      order: vec![NodeOrder::none(), NodeOrder::new_root()],
+      sibling: vec![NONE_ID, NONE_ID],
+      inserted: vec![None, None],
+      direct_parent: vec![NONE_ID, NONE_ID],
+      dom_parent: vec![NONE_ID, NONE_ID],
+      deleted: vec![true, false],
+      next_id: 2,
+      recycled_ids: Default::default(),
+    }
+  }
+
+  // Consider passing in a struct.
+  pub fn add(
+    &mut self,
+    kind: VNode,
+    element: Option<HtmlElement>,
+    index: u32,
+    // key: String,
+    // order: NodeOrder,
+    sibling: Id,
+    inserted: Option<Vec<Id>>,
+    direct_parent: Id,
+    dom_parent: Id,
+  ) {
+    self.kind.push(kind);
+    self.element.push(element);
+    // self.key.push(key);
+    // self.order.push(order);
+    self.sibling.push(sibling);
+    self.inserted.push(inserted);
+    self.direct_parent.push(direct_parent);
+    self.dom_parent.push(dom_parent);
+  }
+
+  // Need to ensure we don't go out of array bounds.
+  fn next_id(&mut self) -> Id {
+    let id = self.next_id;
+    self.next_id += 1;
+    id
+  }
+
   pub fn insert(&mut self, parent: Id, child: Id) {
     let order = &self.order[child];
     let key = &self.key[child];
