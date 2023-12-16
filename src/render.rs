@@ -1,4 +1,5 @@
 use crate::c_t_store::{CTStore, Id, NONE_ID};
+use crate::element::VNode::Div;
 use crate::element::{Attribute, VNode};
 use crate::style::StyleAttribute;
 use crate::util::js_helpers::document;
@@ -17,15 +18,22 @@ pub fn render2(
     // keep Id
   } else {
     match node {
-      VNode::Div(_) => {
-        // new Id
+      Div(attr) => {
         let div = document()
           .create_element("div")
           .unwrap()
           .dyn_into::<HtmlElement>()
           .unwrap();
 
-        store.add(node, Some(div), index, NONE_ID, None, parent, dom_parent);
+        store.add(
+          Div(attr),
+          Some(div),
+          index,
+          NONE_ID,
+          None,
+          parent,
+          dom_parent,
+        );
       }
       VNode::Span(_) => {}
       VNode::None => {}

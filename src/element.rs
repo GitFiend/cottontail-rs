@@ -15,10 +15,29 @@ pub enum VNode {
   Root,
 }
 
+fn find_key(attr: &[Attribute]) -> Option<String> {
+  attr.iter().find_map(|a| match a {
+    Attribute::Key(key) => Some(key.clone()),
+    _ => None,
+  })
+}
+
+impl VNode {
+  pub fn get_key(&self) -> Option<String> {
+    match self {
+      VNode::Div(attr) => find_key(attr),
+      VNode::Span(attr) => find_key(attr),
+      VNode::None => None,
+      VNode::Root => None,
+    }
+  }
+}
+
 pub enum Attribute {
   Children(Vec<VNode>),
   Styles2(Styles),
   Events(Event),
+  Key(String),
 }
 
 #[macro_export]
@@ -53,12 +72,6 @@ macro_rules! style {
   };
 }
 
-fn test() {
-  let s = style! {
-    position: 35;
-  };
-}
-
 #[macro_export]
 macro_rules! children {
   ( $($item:expr),* ) => {{
@@ -87,29 +100,6 @@ macro_rules! on_click {
   }};
 }
 
-// pub trait CustomComponent {
-//   fn render(&mut self) -> VNode;
-//   fn select_state(&mut self);
-// }
-
-pub struct NumbersState {
-  numbers: Vec<i32>,
-}
-
-pub struct Numbers {
-  state: NumbersState,
-}
-
-impl Numbers {
-  pub fn new() -> Self {
-    Self {
-      state: NumbersState {
-        numbers: Vec::new(),
-      },
-    }
-  }
-}
-
 fn test_mut() {
   let mut n = 4;
 
@@ -124,18 +114,6 @@ fn a(n: &mut i32) {
 fn b(n: &mut i32) {
   *n += 1;
 }
-
-// impl CustomComponent for Numbers {
-//   fn render(&mut self) -> VNode {
-//     span([])
-//   }
-//
-//   fn select_state(&mut self) {
-//     self.state = NumbersState {
-//       numbers: Vec::new(),
-//     }
-//   }
-// }
 
 pub trait State {}
 
@@ -162,8 +140,4 @@ impl CustomComponent for App {
       // on_click! {self.n += 1},
     ])
   }
-
-  // fn select_state(&mut self) {
-  //   self.state = AppState { on: false };
-  // }
 }

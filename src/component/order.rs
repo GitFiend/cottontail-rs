@@ -18,8 +18,8 @@ impl NodeOrder {
     Self { location: vec![] }
   }
 
-  pub fn next(&self, parent: &NodeOrder, index: u32) -> Self {
-    let mut location = parent.location.clone();
+  pub fn next(&self, index: u32) -> Self {
+    let mut location = self.location.clone();
     location.push(index);
 
     Self { location }

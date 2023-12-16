@@ -53,21 +53,26 @@ impl CTStore {
     kind: VNode,
     element: Option<HtmlElement>,
     index: u32,
-    // key: String,
-    // order: NodeOrder,
     sibling: Id,
     inserted: Option<Vec<Id>>,
     direct_parent: Id,
     dom_parent: Id,
   ) {
+    let key = if let Some(key) = kind.get_key() {
+      key
+    } else {
+      format!("{}{}", self.key[direct_parent], index)
+    };
+
     self.kind.push(kind);
     self.element.push(element);
-    // self.key.push(key);
-    // self.order.push(order);
+    self.key.push(key);
+    self.order.push(self.order[direct_parent].next(index));
     self.sibling.push(sibling);
     self.inserted.push(inserted);
     self.direct_parent.push(direct_parent);
     self.dom_parent.push(dom_parent);
+    self.next_id += 1;
   }
 
   // Need to ensure we don't go out of array bounds.
