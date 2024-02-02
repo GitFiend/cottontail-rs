@@ -1,16 +1,16 @@
-use crate::component::{DomComponent, ElementComponent, RootComponent};
-use std::collections::HashMap;
-use web_sys::{Element, HtmlElement};
-
-pub trait ChildNode<T> {
-  fn get_element(&self) -> &T;
-}
-
-impl ChildNode<HtmlElement> for DomComponent {
-  fn get_element(&self) -> &HtmlElement {
-    &self.element
-  }
-}
+// use crate::component::{DomComponent, ElementComponent, RootComponent};
+// use std::collections::HashMap;
+// use web_sys::{Element, HtmlElement};
+//
+// pub trait ChildNode<T> {
+//   fn get_element(&self) -> &T;
+// }
+//
+// impl ChildNode<HtmlElement> for DomComponent {
+//   fn get_element(&self) -> &HtmlElement {
+//     &self.element
+//   }
+// }
 
 /*
 Alt idea:
@@ -21,31 +21,31 @@ Don't make a general macro?
 
  */
 
-pub trait ParentNode {
-  fn get(&self) -> ParentFields;
-}
+// pub trait ParentNode {
+//   fn get(&self) -> ParentFields;
+// }
 
-pub struct ParentFields<'a> {
-  pub element: &'a HtmlElement,
-  pub inserted: &'a Vec<ElementComponent>,
-  pub siblings: &'a HashMap<Element, Element>,
-}
-
-macro_rules! parent_component {
-  ($($struct_name: ident),*) => {
-    $(
-    impl ParentNode for $struct_name {
-      fn get(&self) -> ParentFields {
-        ParentFields {
-          element: &self.element,
-          inserted: &self.inserted,
-          siblings: &self.siblings
-        }
-      }
-    }
-    )*
-  };
-}
+// pub struct ParentFields<'a> {
+//   pub element: &'a HtmlElement,
+//   pub inserted: &'a Vec<ElementComponent>,
+//   pub siblings: &'a HashMap<Element, Element>,
+// }
+//
+// macro_rules! parent_component {
+//   ($($struct_name: ident),*) => {
+//     $(
+//     impl ParentNode for $struct_name {
+//       fn get(&self) -> ParentFields {
+//         ParentFields {
+//           element: &self.element,
+//           inserted: &self.inserted,
+//           siblings: &self.siblings
+//         }
+//       }
+//     }
+//     )*
+//   };
+// }
 // parent_component!(RootComponent, DomComponent);
 
 /*

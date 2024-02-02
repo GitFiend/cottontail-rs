@@ -1,15 +1,15 @@
 use std::collections::VecDeque;
 
+use crate::component::order::NodeOrder;
 use web_sys::HtmlElement;
 
-use crate::component::order::NodeOrder;
-use crate::element::VNode;
+use crate::element::Meta;
 
 pub type Id = usize;
 pub const NONE_ID: Id = 0;
 
 pub struct CTStore {
-  pub kind: Vec<VNode>,
+  pub kind: Vec<Meta>,
   pub element: Vec<Option<HtmlElement>>,
   pub key: Vec<String>,
   pub order: Vec<NodeOrder>,
@@ -32,8 +32,9 @@ pub struct CTStore {
 impl CTStore {
   pub fn new(root_element: HtmlElement) -> Self {
     // Root is position 1. 0 is always empty.
+    // Do we need anything for Root?
     CTStore {
-      kind: vec![VNode::None, VNode::Root],
+      kind: vec![Meta::None, Meta::None],
       element: vec![None, Some(root_element)],
       key: vec![String::default(), String::from("r")],
       order: vec![NodeOrder::none(), NodeOrder::new_root()],
@@ -48,31 +49,38 @@ impl CTStore {
   }
 
   // Consider passing in a struct.
+  #[allow(clippy::too_many_arguments)]
   pub fn add(
     &mut self,
-    kind: VNode,
+    kind: Meta,
     element: Option<HtmlElement>,
     index: u32,
-    sibling: Id,
+    sibling: Option<Id>,
     inserted: Option<Vec<Id>>,
     direct_parent: Id,
     dom_parent: Id,
-  ) {
-    let key = if let Some(key) = kind.get_key() {
-      key
-    } else {
-      format!("{}{}", self.key[direct_parent], index)
-    };
+  ) -> Id {
+    // TODO: Check for reusable ids first.
+
+    let key = kind
+      .get_key()
+      .unwrap_or_else(|| format!("{}{}", self.key[direct_parent], index));
 
     self.kind.push(kind);
     self.element.push(element);
     self.key.push(key);
     self.order.push(self.order[direct_parent].next(index));
-    self.sibling.push(sibling);
+    if let Some(sibling) = sibling {
+      self.sibling.push(sibling);
+    }
     self.inserted.push(inserted);
     self.direct_parent.push(direct_parent);
     self.dom_parent.push(dom_parent);
+
+    let id = self.next_id;
     self.next_id += 1;
+
+    id
   }
 
   // Need to ensure we don't go out of array bounds.
@@ -100,7 +108,6 @@ impl CTStore {
               inserted.insert(i, child);
               self.apply_inserts(parent);
             } else {
-              // TODO: Is this line in the wrong order?
               inserted.push(child);
               self.apply_inserts(parent);
             }

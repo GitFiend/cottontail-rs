@@ -1,4 +1,3 @@
-use crate::render::render;
 use crate::util::js_helpers::document;
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlDivElement;
@@ -33,30 +32,30 @@ pub fn start() {
 
   console_log!("div: {:?}, equal: {equal}", div);
 
-  render(
-    div!(
-      // style!(
-      //   Width(100.),
-      //   Height(100.),
-      //   BackgroundColor("red".to_string())
-      // ),
-      // children![
-      //   div!(style!(
-      //     Left(0.),
-      //     Top(10.),
-      //     Bottom(10.),
-      //     Width(50.),
-      //     Height(50.),
-      //     BackgroundColor("blue".to_string())
-      //   )),
-      //   div!(style!(
-      //     Width(50.),
-      //     Height(50.),
-      //     BackgroundColor("green".to_string())
-      //   ))
-      // ]
-    ),
-    None,
-    root,
-  );
+  // render(
+  //   div!(
+  //     // style!(
+  //     //   Width(100.),
+  //     //   Height(100.),
+  //     //   BackgroundColor("red".to_string())
+  //     // ),
+  //     // children![
+  //     //   div!(style!(
+  //     //     Left(0.),
+  //     //     Top(10.),
+  //     //     Bottom(10.),
+  //     //     Width(50.),
+  //     //     Height(50.),
+  //     //     BackgroundColor("blue".to_string())
+  //     //   )),
+  //     //   div!(style!(
+  //     //     Width(50.),
+  //     //     Height(50.),
+  //     //     BackgroundColor("green".to_string())
+  //     //   ))
+  //     // ]
+  //   ),
+  //   None,
+  //   root,
+  // );
 }

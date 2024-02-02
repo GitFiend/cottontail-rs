@@ -1,6 +1,4 @@
-use crate::component::CustomComponent;
-use crate::style::position::Position;
-use crate::style::{styles, Styles};
+use crate::style::Styles;
 
 #[derive(Clone)]
 pub enum Event {
@@ -8,11 +6,32 @@ pub enum Event {
   MouseMove,
 }
 
-pub enum VNode {
-  Div(Vec<Attribute>),
-  Span(Vec<Attribute>),
-  None, // Custom(Box<dyn CustomComponent>),
+pub enum NKind {
+  Dom,
+  Text,
   Root,
+  None,
+}
+
+pub enum Meta {
+  Dom(DomMeta),
+  Text(String),
+  None, // Custom(Box<dyn CustomComponent>),
+}
+
+pub struct DomMeta {
+  pub name: &'static str,
+  pub attr: Vec<Attribute>,
+}
+
+impl Into<NKind> for Meta {
+  fn into(self) -> NKind {
+    match self {
+      Meta::Dom(_) => NKind::Dom,
+      Meta::Text(_) => NKind::Text,
+      Meta::None => NKind::None,
+    }
+  }
 }
 
 fn find_key(attr: &[Attribute]) -> Option<String> {
@@ -22,19 +41,18 @@ fn find_key(attr: &[Attribute]) -> Option<String> {
   })
 }
 
-impl VNode {
+impl Meta {
   pub fn get_key(&self) -> Option<String> {
     match self {
-      VNode::Div(attr) => find_key(attr),
-      VNode::Span(attr) => find_key(attr),
-      VNode::None => None,
-      VNode::Root => None,
+      Meta::Dom(DomMeta { attr, .. }) => find_key(attr),
+      Meta::Text(_) => None,
+      Meta::None => None,
     }
   }
 }
 
 pub enum Attribute {
-  Children(Vec<VNode>),
+  Children(Vec<Meta>),
   Styles2(Styles),
   Events(Event),
   Key(String),
@@ -49,26 +67,32 @@ macro_rules! use_view {
   };
 }
 
-pub fn span<const N: usize>(attr: [Attribute; N]) -> VNode {
-  VNode::Span(Vec::from(attr))
+pub fn span<const N: usize>(attr: [Attribute; N]) -> Meta {
+  Meta::Dom(DomMeta {
+    name: "span",
+    attr: Vec::from(attr),
+  })
 }
 
-pub fn children<const N: usize>(c: [VNode; N]) -> Attribute {
+pub fn children<const N: usize>(c: [Meta; N]) -> Attribute {
   Attribute::Children(Vec::from(c))
 }
 
 #[macro_export]
 macro_rules! div {
   ( $($item:expr),* ) => {{
-     $crate::element::VNode::Div(Vec::from([
+     $crate::element::Meta::Div(Vec::from([
        $($item,)*
      ]))
   }};
 }
 
 macro_rules! style {
-  (position: $v: expr;) => {
+  (position: $v: expr) => {
     format!("position: {}", $v)
+  };
+  (width: $n: expr) => {
+    format!("width: {}", $n)
   };
 }
 
@@ -81,14 +105,17 @@ macro_rules! children {
   }};
 }
 
-pub fn div<const N: usize>(attr: [Attribute; N]) -> VNode {
-  VNode::Div(Vec::from(attr))
+pub fn div<const N: usize>(attr: [Attribute; N]) -> Meta {
+  Meta::Dom(DomMeta {
+    name: "div",
+    attr: Vec::from(attr),
+  })
 }
 
 #[macro_export]
 macro_rules! custom {
   ($c: expr) => {
-    VNode::Custom(Box::new($c))
+    Meta::Custom(Box::new($c))
   };
 }
 
@@ -121,23 +148,25 @@ pub struct AppState {
   on: bool,
 }
 
-pub struct App {
-  n: i32,
-  state: AppState,
-}
-impl CustomComponent for App {
-  fn render(&mut self) -> VNode {
-    span([
-      styles().position(Position::new()).background("blue").into(),
-      children([
-        span([]),
-        div([]),
-        div([]),
-        div([]),
-        div([]),
-        // custom!(Numbers::new()),
-      ]),
-      // on_click! {self.n += 1},
-    ])
-  }
-}
+// pub struct App {
+//   n: i32,
+//   state: AppState,
+// }
+// impl CustomComponent for App {
+//   fn render(&mut self) -> Meta {
+//     style! {width: 5};
+//
+//     span([
+//       styles().position(Position::new()).background("blue").into(),
+//       children([
+//         span([]),
+//         div([]),
+//         div([]),
+//         div([]),
+//         div([]),
+//         // custom!(Numbers::new()),
+//       ]),
+//       // on_click! {self.n += 1},
+//     ])
+//   }
+// }
