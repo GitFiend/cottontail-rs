@@ -5,7 +5,7 @@ use web_sys::HtmlDivElement;
 mod app_root;
 mod c_t_store;
 pub(crate) mod component;
-mod dom_component;
+pub mod components;
 mod element;
 mod render;
 mod style;

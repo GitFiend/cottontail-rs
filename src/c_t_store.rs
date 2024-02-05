@@ -1,13 +1,34 @@
 use std::collections::VecDeque;
 
 use crate::component::order::NodeOrder;
+use crate::components::Component;
 use web_sys::HtmlElement;
 
 use crate::element::Meta;
 
+// TODO: Consider having id specific to each component type for type safety.
 pub type Id = usize;
 pub const NONE_ID: Id = 0;
 
+pub struct CtStore2 {
+  components: Vec<Component>,
+
+  // TODO
+  pub deleted: Vec<bool>,
+  pub next_id: Id,
+  pub recycled_ids: VecDeque<Id>,
+}
+
+impl CtStore2 {
+  pub fn add(&mut self, component: Component) {}
+
+  pub fn get(&self, id: Id) -> Option<&Component> {
+    self.components.get(id)
+  }
+}
+
+// TODO: Do we need to go this far into data-oriented(?) style?
+//  Don't we just need to decouple references between nodes using IDs?
 pub struct CTStore {
   pub kind: Vec<Meta>,
   pub element: Vec<Option<HtmlElement>>,

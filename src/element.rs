@@ -22,6 +22,8 @@ pub enum Meta {
 pub struct DomMeta {
   pub name: &'static str,
   pub attr: Vec<Attribute>,
+  pub sub_nodes: Vec<Meta>,
+  pub key: Option<String>,
 }
 
 impl Into<NKind> for Meta {
@@ -52,7 +54,7 @@ impl Meta {
 }
 
 pub enum Attribute {
-  Children(Vec<Meta>),
+  SubNodes(Vec<Meta>),
   Styles2(Styles),
   Events(Event),
   Key(String),
@@ -67,15 +69,37 @@ macro_rules! use_view {
   };
 }
 
+fn make_dom_meta<const N: usize>(kind: &'static str, attr: [Attribute; N]) -> DomMeta {
+  let mut sub_nodes: Option<Vec<Meta>> = None;
+  let mut key: Option<String> = None;
+
+  let mut attributes: Vec<Attribute> = Vec::new();
+
+  for a in attr {
+    match a {
+      Attribute::SubNodes(s) => sub_nodes = Some(s),
+      Attribute::Key(k) => key = Some(k),
+      a => attributes.push(a),
+    }
+  }
+
+  DomMeta {
+    name: kind,
+    attr: attributes,
+    sub_nodes: sub_nodes.unwrap_or_default(),
+    key,
+  }
+}
+
+pub fn div<const N: usize>(attr: [Attribute; N]) -> Meta {
+  Meta::Dom(make_dom_meta("div", attr))
+}
 pub fn span<const N: usize>(attr: [Attribute; N]) -> Meta {
-  Meta::Dom(DomMeta {
-    name: "span",
-    attr: Vec::from(attr),
-  })
+  Meta::Dom(make_dom_meta("span", attr))
 }
 
 pub fn children<const N: usize>(c: [Meta; N]) -> Attribute {
-  Attribute::Children(Vec::from(c))
+  Attribute::SubNodes(Vec::from(c))
 }
 
 #[macro_export]
@@ -99,17 +123,10 @@ macro_rules! style {
 #[macro_export]
 macro_rules! children {
   ( $($item:expr),* ) => {{
-     $crate::element::Attribute::Children(Vec::from([
+     $crate::element::Attribute::SubNodes(Vec::from([
        $($item,)*
      ]))
   }};
-}
-
-pub fn div<const N: usize>(attr: [Attribute; N]) -> Meta {
-  Meta::Dom(DomMeta {
-    name: "div",
-    attr: Vec::from(attr),
-  })
 }
 
 #[macro_export]
@@ -127,26 +144,26 @@ macro_rules! on_click {
   }};
 }
 
-fn test_mut() {
-  let mut n = 4;
-
-  a(&mut n);
-  b(&mut n);
-}
-
-fn a(n: &mut i32) {
-  *n += 1;
-}
-
-fn b(n: &mut i32) {
-  *n += 1;
-}
-
-pub trait State {}
-
-pub struct AppState {
-  on: bool,
-}
+// fn test_mut() {
+//   let mut n = 4;
+//
+//   a(&mut n);
+//   b(&mut n);
+// }
+//
+// fn a(n: &mut i32) {
+//   *n += 1;
+// }
+//
+// fn b(n: &mut i32) {
+//   *n += 1;
+// }
+//
+// pub trait State {}
+//
+// pub struct AppState {
+//   on: bool,
+// }
 
 // pub struct App {
 //   n: i32,

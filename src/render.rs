@@ -1,5 +1,5 @@
 use crate::c_t_store::{CTStore, Id};
-use crate::dom_component::render_dom;
+use crate::components::dom_component::render_dom;
 use crate::element::Meta;
 
 pub fn render2(

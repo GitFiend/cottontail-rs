@@ -14,6 +14,7 @@ module.exports = (env, argv) => {
       path: path.resolve(__dirname, 'dist'),
       filename: 'index.js',
     },
+    stats: 'errors-only',
     watchOptions: {
       aggregateTimeout: 200,
       poll: 200,
