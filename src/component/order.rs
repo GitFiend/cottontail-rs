@@ -10,10 +10,15 @@ pub struct NodeOrder {
 }
 
 impl NodeOrder {
-  pub fn new_root() -> Self {
+  pub fn default() -> Self {
     Self { location: vec![1] }
   }
 
+  // pub fn new_root() -> Self {
+  //   Self { location: vec![1] }
+  // }
+
+  // TODO: Remove
   pub fn none() -> Self {
     Self { location: vec![] }
   }

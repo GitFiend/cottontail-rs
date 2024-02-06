@@ -13,6 +13,8 @@ pub const NONE_ID: Id = 0;
 pub struct CtStore2 {
   components: Vec<Component>,
 
+  inserts_stack: Vec<Id>,
+
   // TODO
   pub deleted: Vec<bool>,
   pub next_id: Id,
@@ -24,6 +26,61 @@ impl CtStore2 {
 
   pub fn get(&self, id: Id) -> Option<&Component> {
     self.components.get(id)
+  }
+
+  pub fn get_inserted(&self, id: Id) -> Option<Vec<Id>> {
+    match self.get(id) {
+      Some(Component::Dom(c)) => Some(c.inserted.clone()),
+      Some(Component::Text(_)) => None,
+      None => None,
+    }
+  }
+
+  pub fn insert(&mut self, parent_id: Id, child_id: Id) -> Option<()> {
+    let child = self.get(child_id)?;
+    let new_order = child.get_order();
+    let new_key = child.get_key();
+
+    if let Some(component) = self.components.get_mut(parent_id) {
+      if let Component::Dom(c) = component {
+        // c.inserted.insert()
+      }
+    }
+
+    Some(())
+  }
+
+  pub fn apply_inserts(&mut self, parent_id: Id) -> Option<()> {
+    if let Some(inserted) = self.get_inserted(parent_id) {
+      for ids in inserted.windows(2).rev() {
+        let a = ids[0];
+        let b = ids[1];
+
+        if let Some(b) = self.components.get(ids[b]) {
+          let prev_id = b.get_sibling();
+
+          if prev_id.is_none() || prev_id.unwrap() != a {
+            //
+          }
+        }
+      }
+    }
+
+    Some(())
+  }
+
+  fn get_sibling(&self, id: Id) -> Option<Id> {
+    match self.get(id) {
+      Some(Component::Dom(c)) => c.sibling,
+      Some(Component::Text(_)) => None,
+      None => None,
+    }
+  }
+
+  pub fn add_to_inserts(&mut self, id: Id) {
+    if !self.inserts_stack.contains(&id) {
+      self.inserts_stack.push(id);
+    }
   }
 }
 
@@ -58,7 +115,7 @@ impl CTStore {
       kind: vec![Meta::None, Meta::None],
       element: vec![None, Some(root_element)],
       key: vec![String::default(), String::from("r")],
-      order: vec![NodeOrder::none(), NodeOrder::new_root()],
+      order: vec![NodeOrder::none() /* NodeOrder::new_root() */],
       sibling: vec![NONE_ID, NONE_ID],
       inserted: vec![None, None],
       direct_parent: vec![NONE_ID, NONE_ID],

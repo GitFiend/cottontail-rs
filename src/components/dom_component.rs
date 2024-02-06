@@ -2,11 +2,13 @@ use crate::c_t_store::{CTStore, CtStore2, Id};
 use crate::component::order::NodeOrder;
 use crate::element::{Attribute, DomMeta, Meta};
 use crate::util::js_helpers::document;
+use std::collections::HashMap;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 
 pub struct DomComponent {
   pub element_kind: &'static str,
+  pub id: Id,
   // TODO: Attr
   //  We should be able to keep all attr except children/subnodes.
   //  They will be moved to the owning components.
@@ -14,29 +16,50 @@ pub struct DomComponent {
   pub key: String,
   pub order: NodeOrder,
   pub index: usize,
+  pub sub_components: HashMap<String, Id>,
   pub sibling: Option<Id>,
+  // Id of the previous element. Rename?
   pub inserted: Vec<Id>,
   pub direct_parent: Id,
   pub dom_parent: Id,
 }
 
 impl DomComponent {
-  // TODO
-  // fn new(meta: DomMeta, parent: Id, dom_parent: Id, index: u32) -> Option<Self> {
-  //   let el = document()
-  //     .create_element(meta.name)
-  //     .unwrap()
-  //     .dyn_into::<HtmlElement>()
-  //     .ok()?;
-  //
-  //   // meta.
-  //
-  //   Self {
-  //     element_kind: meta.name,
-  //     element: el,
-  //     key, meta.key
-  //   }
-  // }
+  // Dom component must always have a parent.
+  // If creation of this fails, we there is probably something wrong in our design. We should panic/log.
+  // TODO: Convert this to error return type.
+  fn new(
+    meta: DomMeta,
+    id: Id,
+    parent_id: Id,
+    dom_parent_id: Id,
+    index: u32,
+    store: CtStore2,
+  ) -> Option<Self> {
+    let el = document()
+      .create_element(meta.name)
+      .unwrap()
+      .dyn_into::<HtmlElement>()
+      .ok()?;
+
+    let parent = store.get(parent_id)?;
+
+    Some(Self {
+      element_kind: meta.name,
+      id,
+      element: el,
+      key: meta
+        .key
+        .unwrap_or_else(|| format!("{}-{}", parent.get_key(), index)),
+      order: parent.get_order().next(index),
+      index: index as usize,
+      sub_components: HashMap::new(),
+      sibling: None,
+      inserted: Vec::new(),
+      direct_parent: parent_id,
+      dom_parent: dom_parent_id,
+    })
+  }
 
   pub fn render(
     meta: DomMeta,
@@ -51,6 +74,14 @@ impl DomComponent {
     } else {
     }
   }
+}
+
+fn calc_key(index: u32, parent: Id, store: CtStore2) -> String {
+  if let Some(parent) = store.get(parent) {
+
+    // return format!("{}-{}", parent.key, index);
+  }
+  index.to_string()
 }
 
 // TODO: Return type.
