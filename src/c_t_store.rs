@@ -41,26 +41,74 @@ impl CtStore2 {
     let new_order = child.get_order();
     let new_key = child.get_key();
 
-    if let Some(component) = self.components.get_mut(parent_id) {
-      if let Component::Dom(c) = component {
-        // c.inserted.insert()
+    if let Some(mut inserted) = self.get_inserted(parent_id) {
+      for (i, id) in inserted.iter().rev().enumerate() {
+        let c = &self.components[*id];
+        let order = c.get_order();
+
+        if new_order >= order {
+          if new_key != c.get_key() {
+            inserted.insert(i, child_id);
+            self.add_to_inserts(parent_id);
+          }
+          return Some(());
+        }
       }
     }
 
     Some(())
   }
 
+  pub fn insert2(&mut self, parent_id: Id, child_id: Id) -> Option<()> {
+    let child = self.get(child_id)?;
+    let new_order = child.get_order();
+    let new_key = child.get_key();
+
+    if let Some(mut inserted) = self.get_inserted(parent_id) {
+      for (i, id) in inserted.iter().rev().enumerate() {
+        let c = &self.components[*id];
+        let order = c.get_order();
+
+        if new_order >= order {
+          if new_key != c.get_key() {
+            inserted.insert(i, child_id);
+            self.add_to_inserts(parent_id);
+          }
+          return Some(());
+        }
+      }
+    }
+
+    Some(())
+  }
+
+  // TODO: Confirm working and tidy up.
   pub fn apply_inserts(&mut self, parent_id: Id) -> Option<()> {
+    // If the last element isn't already inserted, insert it.
+    // TODO: Can we do this without the contains check?
     if let Some(inserted) = self.get_inserted(parent_id) {
+      if let Some(last_id) = inserted.last() {
+        if let Some(last) = self.get(*last_id) {
+          if let Some(parent) = self.get(parent_id) {
+            if let Some(el) = last.get_element_node() {
+              let parent_node = parent.get_element_node()?;
+              if !parent_node.contains(Some(&el)) {
+                parent_node.insert_before(&el, None).ok()?;
+              }
+            }
+          }
+        }
+      }
+
       for ids in inserted.windows(2).rev() {
-        let a = ids[0];
-        let b = ids[1];
+        let a_id = ids[0];
+        let b_id = ids[1];
 
-        if let Some(b) = self.components.get(ids[b]) {
-          let prev_id = b.get_sibling();
+        if let Some(component) = self.components.get(b_id) {
+          let prev_id = component.get_prev_sibling();
 
-          if prev_id.is_none() || prev_id.unwrap() != a {
-            //
+          if prev_id.is_none() || prev_id.unwrap() != a_id {
+            self.insert_before(parent_id, a_id, b_id);
           }
         }
       }
@@ -69,13 +117,27 @@ impl CtStore2 {
     Some(())
   }
 
-  fn get_sibling(&self, id: Id) -> Option<Id> {
-    match self.get(id) {
-      Some(Component::Dom(c)) => c.sibling,
-      Some(Component::Text(_)) => None,
-      None => None,
-    }
+  fn insert_before(&mut self, parent_id: Id, a_id: Id, b_id: Id) -> Option<()> {
+    let parent = &self.components[parent_id].get_element_node()?;
+
+    let a_node = &self.components[a_id].get_element_node()?;
+    let b_component = &mut self.components[b_id];
+    b_component.set_sibling(a_id);
+
+    parent
+      .insert_before(a_node, Some(&b_component.get_element_node()?))
+      .ok()?;
+
+    Some(())
   }
+
+  // fn get_sibling(&self, id: Id) -> Option<Id> {
+  //   match self.get(id) {
+  //     Some(Component::Dom(c)) => c.sibling,
+  //     Some(Component::Text(_)) => None,
+  //     None => None,
+  //   }
+  // }
 
   pub fn add_to_inserts(&mut self, id: Id) {
     if !self.inserts_stack.contains(&id) {
@@ -86,6 +148,7 @@ impl CtStore2 {
 
 // TODO: Do we need to go this far into data-oriented(?) style?
 //  Don't we just need to decouple references between nodes using IDs?
+// Update yes, we probably do due to how wierd everything is.
 pub struct CTStore {
   pub kind: Vec<Meta>,
   pub element: Vec<Option<HtmlElement>>,
