@@ -1,7 +1,9 @@
 use std::collections::VecDeque;
 
 use crate::component::order::NodeOrder;
+use crate::components::dom_component::DomComponentInfo;
 use crate::components::Component;
+use crate::console_log;
 use web_sys::HtmlElement;
 
 use crate::element::Meta;
@@ -37,29 +39,6 @@ impl CtStore2 {
   }
 
   pub fn insert(&mut self, parent_id: Id, child_id: Id) -> Option<()> {
-    let child = self.get(child_id)?;
-    let new_order = child.get_order();
-    let new_key = child.get_key();
-
-    if let Some(mut inserted) = self.get_inserted(parent_id) {
-      for (i, id) in inserted.iter().rev().enumerate() {
-        let c = &self.components[*id];
-        let order = c.get_order();
-
-        if new_order >= order {
-          if new_key != c.get_key() {
-            inserted.insert(i, child_id);
-            self.add_to_inserts(parent_id);
-          }
-          return Some(());
-        }
-      }
-    }
-
-    Some(())
-  }
-
-  pub fn insert2(&mut self, parent_id: Id, child_id: Id) -> Option<()> {
     let child = self.get(child_id)?;
     let new_order = child.get_order();
     let new_key = child.get_key();
@@ -146,11 +125,19 @@ impl CtStore2 {
   }
 }
 
+#[derive(Debug)]
+pub enum ComponentInfo {
+  Dom(DomComponentInfo),
+  Text,
+  None,
+}
+
 // TODO: Do we need to go this far into data-oriented(?) style?
 //  Don't we just need to decouple references between nodes using IDs?
 // Update yes, we probably do due to how wierd everything is.
+#[derive(Debug)]
 pub struct CTStore {
-  pub kind: Vec<Meta>,
+  pub kind: Vec<ComponentInfo>,
   pub element: Vec<Option<HtmlElement>>,
   pub key: Vec<String>,
   pub order: Vec<NodeOrder>,
@@ -175,12 +162,12 @@ impl CTStore {
     // Root is position 1. 0 is always empty.
     // Do we need anything for Root?
     CTStore {
-      kind: vec![Meta::None, Meta::None],
+      kind: vec![ComponentInfo::None, ComponentInfo::None],
       element: vec![None, Some(root_element)],
-      key: vec![String::default(), String::from("r")],
-      order: vec![NodeOrder::none() /* NodeOrder::new_root() */],
+      key: vec![String::default(), String::from("root")],
+      order: vec![NodeOrder::none(), NodeOrder::default()],
       sibling: vec![NONE_ID, NONE_ID],
-      inserted: vec![None, None],
+      inserted: vec![None, Some(Vec::new())],
       direct_parent: vec![NONE_ID, NONE_ID],
       dom_parent: vec![NONE_ID, NONE_ID],
       deleted: vec![true, false],
@@ -189,34 +176,33 @@ impl CTStore {
     }
   }
 
+  pub fn print(&self) {
+    console_log!("{:?}", self);
+  }
+
   // Consider passing in a struct.
   #[allow(clippy::too_many_arguments)]
   pub fn add(
     &mut self,
-    kind: Meta,
+    kind: ComponentInfo,
+    key: String,
     element: Option<HtmlElement>,
     index: u32,
-    sibling: Option<Id>,
-    inserted: Option<Vec<Id>>,
     direct_parent: Id,
     dom_parent: Id,
   ) -> Id {
     // TODO: Check for reusable ids first.
-
-    let key = kind
-      .get_key()
-      .unwrap_or_else(|| format!("{}{}", self.key[direct_parent], index));
+    console_log!("inside add");
 
     self.kind.push(kind);
     self.element.push(element);
     self.key.push(key);
     self.order.push(self.order[direct_parent].next(index));
-    if let Some(sibling) = sibling {
-      self.sibling.push(sibling);
-    }
-    self.inserted.push(inserted);
+    self.sibling.push(NONE_ID);
+    self.inserted.push(Some(Vec::new()));
     self.direct_parent.push(direct_parent);
     self.dom_parent.push(dom_parent);
+    self.deleted.push(false);
 
     let id = self.next_id;
     self.next_id += 1;
@@ -231,18 +217,25 @@ impl CTStore {
     id
   }
 
+  // TODO: Push to stack of inserts to do later, rather than immediately.
   pub fn insert(&mut self, parent: Id, child: Id) {
     let order = &self.order[child];
     let key = &self.key[child];
 
+    self.print();
+
     if let Some(inserted) = &mut self.inserted[parent] {
+      console_log!("have parent. inserted: {}", inserted.len());
+
       for (i, current) in inserted.iter().rev().cloned().enumerate() {
+        console_log!("hi");
+
         let next = inserted.get(i + 1);
 
-        /*
-        If order is the same we expect the keys to be different. This
-        is expected for a virtual list.
-         */
+        console_log!("{:?}", next);
+
+        // If order is the same, we expect the keys to be different.
+        // This is expected for a virtual list.
         if order >= &self.order[current] {
           if key != &self.key[current] {
             if next.is_some() {
@@ -257,7 +250,9 @@ impl CTStore {
           return;
         }
       }
-      inserted.insert(0, child);
+
+      inserted.push(child);
+      console_log!("inserted: {:?}", inserted);
       self.apply_inserts(parent);
     }
   }
@@ -268,14 +263,20 @@ impl CTStore {
 
     for current in self.inserted[parent].as_mut()?.iter().rev().cloned() {
       let current_element = self.element[current].as_ref().unwrap();
+      console_log!("hi");
 
       match next {
+        // This means current is the last element.
         None => {
+          console_log!("hi");
+          // If current has no sibling, it may not have been inserted.
           if self.sibling[current] == NONE_ID {
+            // Insert at the end
             parent_element.insert_before(current_element, None).unwrap();
           }
         }
         Some(next) => {
+          console_log!("hi 2");
           if self.sibling[next] != NONE_ID && self.sibling[next] != current {
             parent_element
               .insert_before(
@@ -290,6 +291,11 @@ impl CTStore {
 
       next = Some(current);
     }
+
+    debug_assert_eq!(
+      parent_element.child_element_count() as usize,
+      self.inserted[parent].as_ref().unwrap().len()
+    );
 
     Some(())
   }

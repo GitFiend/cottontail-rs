@@ -1,10 +1,17 @@
-use crate::c_t_store::{CTStore, CtStore2, Id};
+use crate::c_t_store::{CTStore, ComponentInfo, CtStore2, Id, NONE_ID};
 use crate::component::order::NodeOrder;
-use crate::element::{Attribute, DomMeta, Meta};
+use crate::element::{Attribute, DomMeta};
 use crate::util::js_helpers::document;
 use std::collections::HashMap;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
+
+// Like DomMeta, with sub nodes and key removed.
+#[derive(Debug)]
+pub struct DomComponentInfo {
+  pub element_kind: &'static str,
+  pub attr: Vec<Attribute>,
+}
 
 pub struct DomComponent {
   pub element_kind: &'static str,
@@ -92,19 +99,21 @@ pub fn render_dom(
   dom_parent: Id,
   index: u32,
   store: &mut CTStore,
-) {
+) -> Id {
   if prev.is_none() {
-    make_dom_component(meta, parent, dom_parent, index, store);
+    return make_dom_component(meta, parent, dom_parent, index, store);
   }
+
+  NONE_ID
 }
 
 pub fn make_dom_component(
   meta: DomMeta,
-  parent: Id,
-  dom_parent: Id,
+  parent_id: Id,
+  dom_parent_id: Id,
   index: u32,
   store: &mut CTStore,
-) {
+) -> Id {
   let el = document()
     .create_element(meta.name)
     .unwrap()
@@ -126,7 +135,26 @@ pub fn make_dom_component(
     }
   }
 
-  store.add(Meta::Dom(meta), el, index, None, None, parent, dom_parent);
+  let key = meta
+    .key
+    .unwrap_or_else(|| format!("{}-{}", store.key[parent_id], index));
+
+  let id = store.add(
+    ComponentInfo::Dom(DomComponentInfo {
+      element_kind: meta.name,
+      attr: meta.attr,
+    }),
+    key,
+    el,
+    index,
+    parent_id,
+    dom_parent_id,
+  );
+
+  store.insert(parent_id, id);
+
+  id
+  // TODO: Subcomponents
 }
 
 // IDEAS:

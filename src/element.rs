@@ -1,6 +1,6 @@
 use crate::style::Styles;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Event {
   Click,
   MouseMove,
@@ -13,12 +13,14 @@ pub enum NKind {
   None,
 }
 
+#[derive(Debug)]
 pub enum Meta {
   Dom(DomMeta),
   Text(String),
   None, // Custom(Box<dyn CustomComponent>),
 }
 
+#[derive(Debug)]
 pub struct DomMeta {
   pub name: &'static str,
   pub attr: Vec<Attribute>,
@@ -53,6 +55,7 @@ impl Meta {
   }
 }
 
+#[derive(Debug)]
 pub enum Attribute {
   SubNodes(Vec<Meta>),
   Styles2(Styles),

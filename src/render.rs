@@ -1,8 +1,8 @@
-use crate::c_t_store::{CTStore, Id};
+use crate::c_t_store::{CTStore, Id, NONE_ID};
 use crate::components::dom_component::render_dom;
 use crate::element::Meta;
 
-pub fn render2(
+pub fn render(
   meta: Option<Meta>,
   prev: Option<Id>,
   parent: Id,
@@ -10,18 +10,19 @@ pub fn render2(
   index: u32,
   store: &mut CTStore,
 ) {
-  match meta {
+  let id = match meta {
     None => {
       if let Some(prev) = prev {
         // TODO: Remove component
       }
+      NONE_ID
     }
     Some(meta) => match meta {
-      Meta::Text(text) => {}
+      Meta::Text(text) => NONE_ID,
       Meta::Dom(meta) => render_dom(meta, prev, parent, dom_parent, index, store),
-      Meta::None => {}
+      Meta::None => NONE_ID,
     },
-  }
+  };
 
   if let Some(prev) = prev {
     // keep Id
