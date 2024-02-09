@@ -38,23 +38,6 @@ impl Into<NKind> for Meta {
   }
 }
 
-fn find_key(attr: &[Attribute]) -> Option<String> {
-  attr.iter().find_map(|a| match a {
-    Attribute::Key(key) => Some(key.clone()),
-    _ => None,
-  })
-}
-
-impl Meta {
-  pub fn get_key(&self) -> Option<String> {
-    match self {
-      Meta::Dom(DomMeta { attr, .. }) => find_key(attr),
-      Meta::Text(_) => None,
-      Meta::None => None,
-    }
-  }
-}
-
 #[derive(Debug)]
 pub enum Attribute {
   SubNodes(Vec<Meta>),
