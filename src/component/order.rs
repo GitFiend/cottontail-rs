@@ -1,9 +1,3 @@
-pub struct OrderAttr {
-  pub order: String,
-  pub key: String,
-  pub index: u32,
-}
-
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub struct NodeOrder {
   location: Vec<u32>,
@@ -14,11 +8,6 @@ impl NodeOrder {
     Self { location: vec![1] }
   }
 
-  // pub fn new_root() -> Self {
-  //   Self { location: vec![1] }
-  // }
-
-  // TODO: Remove
   pub fn none() -> Self {
     Self { location: vec![] }
   }

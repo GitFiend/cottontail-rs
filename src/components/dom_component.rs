@@ -3,6 +3,7 @@ use web_sys::HtmlElement;
 
 use crate::c_t_store::{CTStore, ComponentInfo, Id, NONE_ID};
 use crate::element::{Attribute, DomMeta};
+use crate::render::render_sub_components;
 use crate::util::js_helpers::document;
 
 // Like DomMeta, with sub nodes and key removed.
@@ -41,21 +42,6 @@ pub fn make_dom_component(
     .dyn_into::<HtmlElement>()
     .ok();
 
-  for a in &meta.attr {
-    match a {
-      Attribute::SubNodes(nodes) => {
-        for node in nodes {
-          // TODO: Tricky problem where sub-nodes are owned by parent
-          //  and need to be passed to render?
-          // render2(Some(*node))
-        }
-      }
-      Attribute::Styles2(_) => {}
-      Attribute::Events(_) => {}
-      Attribute::Key(_) => {}
-    }
-  }
-
   let key = meta
     .key
     .unwrap_or_else(|| format!("{}-{}", store.key[parent_id], index));
@@ -65,14 +51,17 @@ pub fn make_dom_component(
       element_kind: meta.name,
       attr: meta.attr,
     }),
-    key,
     el,
+    key,
     index,
     parent_id,
     dom_parent_id,
+    Some(Vec::new()),
   );
 
   store.insert(parent_id, id);
+
+  render_sub_components(store, id, id, meta.sub_nodes);
 
   id
   // TODO: Subcomponents
