@@ -1,9 +1,9 @@
+use std::collections::HashMap;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 
 use crate::c_t_store::{CTStore, ComponentInfo, Id, NONE_ID};
 use crate::element::{Attribute, DomMeta};
-use crate::render::render_sub_components;
 use crate::util::js_helpers::document;
 
 // Like DomMeta, with sub nodes and key removed.
@@ -57,14 +57,14 @@ pub fn make_dom_component(
     parent_id,
     dom_parent_id,
     Some(Vec::new()),
+    Some(HashMap::new()),
   );
 
   store.insert(parent_id, id);
 
-  render_sub_components(store, id, id, meta.sub_nodes);
+  store.render_subcomponents(id, id, meta.sub_nodes);
 
   id
-  // TODO: Subcomponents
 }
 
 // IDEAS:

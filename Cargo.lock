@@ -19,7 +19,6 @@ name = "cottontail-rs"
 version = "0.1.0"
 dependencies = [
  "js-sys",
- "once_cell",
  "wasm-bindgen",
  "web-sys",
 ]

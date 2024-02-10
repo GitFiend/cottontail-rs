@@ -1,4 +1,3 @@
-pub(crate) mod border;
 pub(crate) mod position;
 
 use crate::element::Attribute;

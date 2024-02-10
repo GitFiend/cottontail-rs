@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 
 use crate::component::order::NodeOrder;
 use crate::components::dom_component::DomComponentInfo;
@@ -31,7 +31,8 @@ pub struct CTStore {
 
   // Index is the parent, and inserted are the ordered child elements.
   // Optional as not all components can have subcomponents.
-  pub sub_components: Vec<Option<Vec<Id>>>,
+  pub inserted: Vec<Option<Vec<Id>>>,
+  pub sub_components: Vec<Option<HashMap<String, Id>>>,
 
   pub direct_parent: Vec<Id>,
   pub dom_parent: Vec<Id>,
@@ -54,7 +55,8 @@ impl CTStore {
       sibling: vec![NONE_ID, NONE_ID],
       direct_parent: vec![NONE_ID, NONE_ID],
       dom_parent: vec![NONE_ID, NONE_ID],
-      sub_components: vec![None, Some(Vec::new())],
+      inserted: vec![None, Some(Vec::new())],
+      sub_components: vec![None, Some(HashMap::new())],
       deleted: vec![true, false],
       next_id: 2,
       recycled_ids: Default::default(),
@@ -74,7 +76,8 @@ impl CTStore {
     index: u32,
     direct_parent: Id,
     dom_parent: Id,
-    sub_components: Option<Vec<Id>>,
+    inserted: Option<Vec<Id>>,
+    sub_components: Option<HashMap<String, Id>>,
   ) -> Id {
     // TODO: Check for reusable ids first.
 
@@ -85,6 +88,7 @@ impl CTStore {
     self.sibling.push(NONE_ID);
     self.direct_parent.push(direct_parent);
     self.dom_parent.push(dom_parent);
+    self.inserted.push(inserted);
     self.sub_components.push(sub_components);
     self.deleted.push(false);
 
@@ -101,7 +105,7 @@ impl CTStore {
 
     self.print();
 
-    if let Some(inserted) = &mut self.sub_components[parent] {
+    if let Some(inserted) = &mut self.inserted[parent] {
       for (i, current) in inserted.iter().rev().cloned().enumerate() {
         let next = inserted.get(i + 1);
 
@@ -131,7 +135,7 @@ impl CTStore {
     let parent_element = self.element[parent].as_ref()?;
     let mut next: Option<Id> = None;
 
-    for current in self.sub_components[parent].as_mut()?.iter().rev().cloned() {
+    for current in self.inserted[parent].as_mut()?.iter().rev().cloned() {
       let current_element = self.element[current].as_ref().unwrap();
 
       match next {
@@ -161,7 +165,7 @@ impl CTStore {
 
     debug_assert_eq!(
       parent_element.child_element_count() as usize,
-      self.sub_components[parent].as_ref().unwrap().len()
+      self.inserted[parent].as_ref().unwrap().len()
     );
 
     Some(())
@@ -183,7 +187,7 @@ impl CTStore {
   }
 
   fn remove_from_inserted(&mut self, parent: Id, child: Id) {
-    if let Some(inserted) = &mut self.sub_components[parent] {
+    if let Some(inserted) = &mut self.inserted[parent] {
       let key = &self.key[child];
       if let Some(i) = inserted.iter().position(|ins| self.key[*ins] == *key) {
         inserted.remove(i);
