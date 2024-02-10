@@ -19,7 +19,7 @@ pub fn render_dom(
   prev: Option<Id>,
   parent: Id,
   dom_parent: Id,
-  index: u32,
+  index: usize,
   store: &mut CTStore,
 ) -> Id {
   if prev.is_none() {
@@ -33,7 +33,7 @@ pub fn make_dom_component(
   meta: DomMeta,
   parent_id: Id,
   dom_parent_id: Id,
-  index: u32,
+  index: usize,
   store: &mut CTStore,
 ) -> Id {
   let el = document()

@@ -1,5 +1,5 @@
 use crate::c_t_store::CTStore;
-use crate::element::div;
+use crate::element::{children, div, span};
 use crate::util::js_helpers::document;
 use wasm_bindgen::prelude::*;
 
@@ -24,5 +24,5 @@ pub fn start() {
 
   let mut store = CTStore::new(root);
 
-  store.render(Some(div([])), None, 1, 1, 0);
+  store.render(Some(div([children([div([]), span([])])])), None, 1, 1, 0);
 }

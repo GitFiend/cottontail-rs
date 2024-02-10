@@ -113,7 +113,7 @@ mod tests {
   }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Styles {
   pub styles: Vec<StyleAttribute>,
 }
@@ -143,7 +143,7 @@ impl From<Styles> for Attribute {
   }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum StyleAttribute {
   BackgroundColor(String),
   Position(Position),

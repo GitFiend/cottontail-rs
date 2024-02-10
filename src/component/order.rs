@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub struct NodeOrder {
-  location: Vec<u32>,
+  location: Vec<usize>,
 }
 
 impl NodeOrder {
@@ -12,7 +12,7 @@ impl NodeOrder {
     Self { location: vec![] }
   }
 
-  pub fn next(&self, index: u32) -> Self {
+  pub fn next(&self, index: usize) -> Self {
     let mut location = self.location.clone();
     location.push(index);
 

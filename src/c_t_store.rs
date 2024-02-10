@@ -73,7 +73,7 @@ impl CTStore {
     kind: ComponentInfo,
     element: Option<HtmlElement>,
     key: String,
-    index: u32,
+    index: usize,
     direct_parent: Id,
     dom_parent: Id,
     inserted: Option<Vec<Id>>,
