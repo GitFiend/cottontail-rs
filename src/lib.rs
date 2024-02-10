@@ -24,5 +24,11 @@ pub fn start() {
 
   let mut store = CTStore::new(root);
 
-  store.render(Some(div([children([div([]), span([])])])), None, 1, 1, 0);
+  store.render(
+    Some(div([children([div([children([div([])])]), span([])])])),
+    None,
+    1,
+    1,
+    0,
+  );
 }

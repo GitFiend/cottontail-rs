@@ -63,6 +63,8 @@ impl CTStore {
         self.remove(parent_id, *id);
       }
     }
+
+    self.sub_components[parent_id] = Some(new_components);
   }
 
   pub fn render_subcomponent(
