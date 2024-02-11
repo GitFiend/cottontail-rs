@@ -15,6 +15,7 @@ impl CTStore {
     let id = match meta {
       None => {
         if let Some(prev) = prev {
+          self.remove(parent, prev);
           // TODO: Remove component
         }
         NONE_ID

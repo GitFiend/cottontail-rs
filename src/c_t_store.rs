@@ -153,6 +153,7 @@ impl CTStore {
     for id in stack {
       self.apply_inserts_for_parent(id);
     }
+    self.insert_stack.clear();
   }
 
   fn apply_inserts_for_parent(&mut self, parent: Id) -> Option<()> {
@@ -221,6 +222,8 @@ impl CTStore {
   }
 
   pub fn remove(&mut self, parent: Id, child: Id) {
+    console_log!("Remove {child}");
+
     self.remove_from_inserted(parent, child);
 
     if let Some(child) = &self.element[child] {

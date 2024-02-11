@@ -37,9 +37,17 @@ pub fn start() {
     span([]),
   ])]);
 
-  // let view = div([children([div([]), span([]), div([])])]);
+  let id = store.render(Some(view), None, 1, 1, 0);
 
-  store.render(Some(view), None, 1, 1, 0);
+  store.apply_inserts();
+
+  // let view = div([children([
+  //   div([children([div([]), span([]), div([])])]),
+  //   span([]),
+  // ])]);
+  // store.render(Some(view), Some(id), 1, 1, 0);
+
+  store.render(None, Some(id), 1, 1, 0);
 
   store.apply_inserts();
 }
