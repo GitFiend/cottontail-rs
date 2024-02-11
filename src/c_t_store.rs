@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::component::order::NodeOrder;
 use crate::components::dom_component::DomComponentInfo;
@@ -37,10 +37,11 @@ pub struct CTStore {
   pub direct_parent: Vec<Id>,
   pub dom_parent: Vec<Id>,
 
+  insert_stack: HashSet<Id>,
   // TODO
-  pub deleted: Vec<bool>,
-  pub next_id: Id,
-  pub recycled_ids: VecDeque<Id>,
+  deleted: Vec<bool>,
+  next_id: Id,
+  recycled_ids: VecDeque<Id>,
 }
 
 impl CTStore {
@@ -53,10 +54,11 @@ impl CTStore {
       key: vec![String::default(), String::from("root")],
       order: vec![NodeOrder::none(), NodeOrder::default()],
       sibling: vec![NONE_ID, NONE_ID],
-      direct_parent: vec![NONE_ID, NONE_ID],
-      dom_parent: vec![NONE_ID, NONE_ID],
       inserted: vec![None, Some(Vec::new())],
       sub_components: vec![None, Some(HashMap::new())],
+      direct_parent: vec![NONE_ID, NONE_ID],
+      dom_parent: vec![NONE_ID, NONE_ID],
+      insert_stack: HashSet::new(),
       deleted: vec![true, false],
       next_id: 2,
       recycled_ids: Default::default(),
@@ -99,13 +101,14 @@ impl CTStore {
   }
 
   // TODO: Push to stack of inserts to do later, rather than immediately.
-  pub fn insert(&mut self, parent: Id, child: Id) {
-    let order = &self.order[child];
-    let key = &self.key[child];
+  pub fn insert(&mut self, parent_id: Id, child_id: Id) {
+    let order = &self.order[child_id];
+    let key = &self.key[child_id];
 
-    self.print();
+    // self.print();
+    console_log!("parent {parent_id}, child: {child_id}, order: {:?}", order);
 
-    if let Some(inserted) = &mut self.inserted[parent] {
+    if let Some(inserted) = &mut self.inserted[parent_id] {
       for (i, current) in inserted.iter().rev().cloned().enumerate() {
         let next = inserted.get(i + 1);
 
@@ -114,59 +117,98 @@ impl CTStore {
         if order >= &self.order[current] {
           if key != &self.key[current] {
             if next.is_some() {
-              inserted.insert(i, child);
-              self.apply_inserts(parent);
+              console_log!("a insert {child_id} at {i}");
+              inserted.insert(i, child_id);
             } else {
-              inserted.push(child);
-              self.apply_inserts(parent);
+              console_log!("b insert {child_id} at end");
+              inserted.push(child_id);
             }
+            self.queue_insert(parent_id);
           }
 
           return;
         }
       }
 
-      inserted.push(child);
-      self.apply_inserts(parent);
+      console_log!("c insert {child_id} at end");
+      inserted.push(child_id);
+      // self.apply_inserts(parent_id);
+      self.queue_insert(parent_id);
     }
   }
 
-  fn apply_inserts(&mut self, parent: Id) -> Option<()> {
+  fn queue_insert(&mut self, id: Id) {
+    self.insert_stack.insert(id);
+  }
+
+  pub fn apply_inserts(&mut self) {
+    let mut stack = self.insert_stack.iter().cloned().collect::<Vec<Id>>();
+    stack.sort();
+
+    console_log!("apply_inserts {:?}", self.insert_stack);
+
+    // TODO: Order?
+
+    for id in stack {
+      self.apply_inserts_for_parent(id);
+    }
+  }
+
+  fn apply_inserts_for_parent(&mut self, parent: Id) -> Option<()> {
     let parent_element = self.element[parent].as_ref()?;
     let mut next: Option<Id> = None;
 
-    for current in self.inserted[parent].as_mut()?.iter().rev().cloned() {
-      let current_element = self.element[current].as_ref().unwrap();
+    console_log!("inserted: {:?}, parent: {parent}", self.inserted[parent]);
+    let mut i = self.inserted[parent].clone()?.len() - 1;
+
+    // console_log!("start inserted.len(): {i}, parent_id: {parent}");
+
+    for id in self.inserted[parent].as_mut()?.iter().rev().cloned() {
+      console_log!("loop i: {i}, id: {id}");
+      let current_element = self.element[id].as_ref().unwrap();
 
       match next {
         // This means current is the last element.
         None => {
           // If current has no sibling, it may not have been inserted.
-          if self.sibling[current] == NONE_ID {
-            // Insert at the end
-            parent_element.insert_before(current_element, None).unwrap();
+          if let Some(sibling_id) = self.sibling.get(id) {
+            if *sibling_id == NONE_ID {
+              // Insert at the end
+              console_log!("insert {id} at end (no sibling)");
+              parent_element.insert_before(current_element, None).unwrap();
+            }
           }
         }
         Some(next) => {
-          if self.sibling[next] != NONE_ID && self.sibling[next] != current {
+          console_log!("next {next}, {:?}", self.sibling.get(next));
+          if self.sibling[next] != id {
+            let next_node = self.element[next].as_ref();
+            console_log!(
+              "insert {id} before {:?}, {:?}",
+              self.kind[id],
+              self.kind[next]
+            );
+
+            console_log!("insert {id} {:?} {:?}", current_element, self.kind[id]);
             parent_element
-              .insert_before(
-                current_element,
-                Some(&**self.element[next].as_ref().unwrap()),
-              )
+              .insert_before(current_element, Some(&**next_node.unwrap()))
               .unwrap();
-            self.sibling[next] = current;
+
+            self.sibling[next] = id;
           }
         }
       }
 
-      next = Some(current);
+      i = i.saturating_sub(1);
+      next = Some(id);
     }
 
-    debug_assert_eq!(
-      parent_element.child_element_count() as usize,
-      self.inserted[parent].as_ref().unwrap().len()
-    );
+    if cfg!(debug_assertions)
+      && parent_element.child_element_count() as usize
+        != self.inserted[parent].as_ref().unwrap().len()
+    {
+      console_log!("inserted and children count don't match!!");
+    }
 
     Some(())
   }

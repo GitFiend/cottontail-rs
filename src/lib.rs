@@ -1,5 +1,5 @@
 use crate::c_t_store::CTStore;
-use crate::element::{children, div, span};
+use crate::element::{children, div, span, DomMeta};
 use crate::util::js_helpers::document;
 use wasm_bindgen::prelude::*;
 
@@ -31,4 +31,28 @@ pub fn start() {
     1,
     0,
   );
+
+  store.apply_inserts();
 }
+
+// fn test() {
+//   let ting = [
+//     Dom(DomMeta {
+//       name: "div",
+//       attr: [],
+//       sub_nodes: [Dom(DomMeta {
+//         name: "div",
+//         attr: [],
+//         sub_nodes: [],
+//         key: None,
+//       })],
+//       key: None,
+//     }),
+//     Dom(DomMeta {
+//       name: "span",
+//       attr: [],
+//       sub_nodes: [],
+//       key: None,
+//     }),
+//   ];
+// }

@@ -52,7 +52,7 @@ impl CTStore {
 
     let mut new_components = HashMap::new();
 
-    for (i, meta) in sub_nodes.into_iter().rev().enumerate() {
+    for (i, meta) in sub_nodes.into_iter().enumerate() {
       if meta != Meta::None {
         self.render_subcomponent(meta, parent_id, dom_parent, i, &mut new_components);
       }

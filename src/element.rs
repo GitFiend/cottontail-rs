@@ -1,3 +1,4 @@
+use crate::console_log;
 use crate::style::Styles;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -81,6 +82,12 @@ fn make_dom_meta<const N: usize>(kind: &'static str, attr: [Attribute; N]) -> Do
       Attribute::SubNodes(s) => sub_nodes = Some(s),
       Attribute::Key(k) => key = Some(k),
       a => attributes.push(a),
+    }
+  }
+
+  if let Some(nodes) = &sub_nodes {
+    if nodes.len() == 2 {
+      console_log!("nodes: {:?}", nodes);
     }
   }
 

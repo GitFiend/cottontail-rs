@@ -3,6 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 
 use crate::c_t_store::{CTStore, ComponentInfo, Id, NONE_ID};
+use crate::console_log;
 use crate::element::{Attribute, DomMeta};
 use crate::util::js_helpers::document;
 
@@ -60,8 +61,11 @@ pub fn make_dom_component(
     Some(HashMap::new()),
   );
 
-  store.insert(parent_id, id);
+  if let Some(el) = &store.element[id] {
+    el.set_id(&id.to_string());
+  }
 
+  store.insert(parent_id, id);
   store.render_subcomponents(id, id, meta.sub_nodes);
 
   id
