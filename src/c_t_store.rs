@@ -105,35 +105,36 @@ impl CTStore {
     let order = &self.order[child_id];
     let key = &self.key[child_id];
 
-    // self.print();
     console_log!("parent {parent_id}, child: {child_id}, order: {:?}", order);
 
     if let Some(inserted) = &mut self.inserted[parent_id] {
-      for (i, current) in inserted.iter().rev().cloned().enumerate() {
-        let next = inserted.get(i + 1);
+      if inserted.is_empty() {
+        console_log!("c insert {child_id} at end {:?}", inserted);
+        inserted.push(child_id);
+        self.queue_insert(parent_id);
+      } else {
+        let mut i = inserted.len() - 1;
+        for inserted_id in inserted.iter().rev().cloned() {
+          console_log!("i: {i}, {:?}", inserted);
+          // If order is the same, we expect the keys to be different.
+          // This is expected for a virtual list.
+          if order >= &self.order[inserted_id] {
+            if key != &self.key[inserted_id] {
+              console_log!(
+                "insert {:?} after {:?}, {i}",
+                self.order[child_id],
+                self.order[inserted_id]
+              );
+              console_log!("a insert {child_id} at {} {:?}", i + 1, inserted);
+              inserted.insert(i + 1, child_id);
 
-        // If order is the same, we expect the keys to be different.
-        // This is expected for a virtual list.
-        if order >= &self.order[current] {
-          if key != &self.key[current] {
-            if next.is_some() {
-              console_log!("a insert {child_id} at {i}");
-              inserted.insert(i, child_id);
-            } else {
-              console_log!("b insert {child_id} at end");
-              inserted.push(child_id);
+              self.queue_insert(parent_id);
             }
-            self.queue_insert(parent_id);
+            return;
           }
-
-          return;
+          i -= 1;
         }
       }
-
-      console_log!("c insert {child_id} at end");
-      inserted.push(child_id);
-      // self.apply_inserts(parent_id);
-      self.queue_insert(parent_id);
     }
   }
 

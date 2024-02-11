@@ -1,5 +1,5 @@
 use crate::c_t_store::CTStore;
-use crate::element::{children, div, span, DomMeta};
+use crate::element::{children, div, span};
 use crate::util::js_helpers::document;
 use wasm_bindgen::prelude::*;
 
@@ -14,8 +14,6 @@ pub(crate) mod util;
 
 #[wasm_bindgen(start)]
 pub fn start() {
-  console_log!("hello");
-
   let root = document()
     .get_element_by_id("root")
     .unwrap()
@@ -24,35 +22,24 @@ pub fn start() {
 
   let mut store = CTStore::new(root);
 
-  store.render(
-    Some(div([children([div([children([div([])])]), span([])])])),
-    None,
-    1,
-    1,
-    0,
-  );
+  let view = div([children([
+    div([children([
+      div([]),
+      span([]),
+      div([]),
+      span([]),
+      div([]),
+      span([]),
+      div([]),
+      span([]),
+      div([]),
+    ])]),
+    span([]),
+  ])]);
+
+  // let view = div([children([div([]), span([]), div([])])]);
+
+  store.render(Some(view), None, 1, 1, 0);
 
   store.apply_inserts();
 }
-
-// fn test() {
-//   let ting = [
-//     Dom(DomMeta {
-//       name: "div",
-//       attr: [],
-//       sub_nodes: [Dom(DomMeta {
-//         name: "div",
-//         attr: [],
-//         sub_nodes: [],
-//         key: None,
-//       })],
-//       key: None,
-//     }),
-//     Dom(DomMeta {
-//       name: "span",
-//       attr: [],
-//       sub_nodes: [],
-//       key: None,
-//     }),
-//   ];
-// }

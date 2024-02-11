@@ -85,11 +85,11 @@ fn make_dom_meta<const N: usize>(kind: &'static str, attr: [Attribute; N]) -> Do
     }
   }
 
-  if let Some(nodes) = &sub_nodes {
-    if nodes.len() == 2 {
-      console_log!("nodes: {:?}", nodes);
-    }
-  }
+  // if let Some(nodes) = &sub_nodes {
+  //   if nodes.len() == 2 {
+  //     console_log!("nodes: {:?}", nodes);
+  //   }
+  // }
 
   DomMeta {
     name: kind,
